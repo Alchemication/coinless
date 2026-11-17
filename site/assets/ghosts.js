@@ -3,8 +3,9 @@
 // a tribute (credited in the footer). A game is dealt first, so every game gets
 // its turn however many sprites it has, then one of its sprites. One fades in
 // at a time, alternating sides, at a random spot, tilt and size in the empty
-// space beside the title, lingers, and fades away. Only on wide screens, never
-// for visitors who prefer less motion, and paused while the tab is hidden.
+// space beside the title, lingers, and fades away. On phones and narrow windows
+// they're smaller and appear beside the spinning disc instead. Never for
+// visitors who prefer less motion, and paused while the tab is hidden.
 // ?ghosts=all shows every sprite; ?ghosts=still holds four at their peak;
 // ?ghosts=portraits holds four portraits.
 ;(() => {
@@ -82,24 +83,48 @@
     return { kind, name: sprites[Math.floor(Math.random() * sprites.length)] }
   }
 
+  // Where a ghost may go, in pixels within the stage. Wide screens: the empty
+  // gutter beside the centred title, kept clear of the words. Phones and narrow
+  // windows: the strip beside the spinning disc, with smaller, slightly brighter ghosts.
+  const disc = document.querySelector('.disc')
+  const place = (kind) => {
+    const box = stage.getBoundingClientRect()
+    if (wide.matches) {
+      const height = { icon: random(48, 92), figure: random(120, 200), portrait: random(96, 140) }[kind]
+      const gutter = Math.max(0, (innerWidth - 760) / 2)
+      return { height, x: random(gutter * 0.06, Math.max(gutter * 0.06, gutter - height * 0.9 - 30)),
+        low: box.height * 0.04, high: box.height * 0.62, apart: box.height * 0.1, peak: random(0.09, 0.17) }
+    }
+    const ring = disc.getBoundingClientRect()
+    const strip = (box.width - ring.width) / 2
+    const height = Math.min({ icon: random(30, 48), figure: random(64, 100), portrait: random(56, 76) }[kind], strip - 12)
+    const x = random(4, Math.max(4, strip - height * 0.85 - 6))
+    return { height, x, width: strip - x - 6,
+      low: ring.top - box.top - 10, high: ring.bottom - box.top - height * 0.85, apart: 6, peak: random(0.13, 0.22) }
+  }
+
   const spawn = () => {
-    if (document.hidden || !wide.matches) return
+    if (document.hidden) return
     const { kind, name } = next()
+    const { height, x, width, low, high, apart, peak } = place(kind)
+    if (height < 28) return
     side = side === 'left' ? 'right' : 'left'
+    // Keep clear of any ghost still fading on the same side; skip a turn if there's no room.
+    const taken = [...stage.querySelectorAll(`.ghost[data-side="${side}"]`)]
+      .map((other) => [other.offsetTop - apart, other.offsetTop + other.offsetHeight + apart])
+    const clashes = (top) => taken.some(([from, to]) => top < to && top + height > from)
+    let top = random(low, high)
+    for (let tries = 0; tries < 12 && clashes(top); tries++) top = random(low, high)
+    if (clashes(top)) return
     const ghost = document.createElement('div')
     ghost.className = `ghost ${kind}`
-    ghost.append(image(name))
-    const height = { icon: random(48, 92), figure: random(120, 200), portrait: random(96, 140) }[kind]
-    // The empty gutter beside the centred title, kept clear of the words.
-    const gutter = Math.max(0, (innerWidth - 760) / 2)
-    const x = random(gutter * 0.06, Math.max(gutter * 0.06, gutter - height * 0.9 - 30))
-    // Keep clear of any ghost still fading on the same side.
-    const taken = [...stage.querySelectorAll(`.ghost[data-side="${side}"]`)].map((other) => parseFloat(other.style.top))
-    let top = random(4, 62)
-    for (let tries = 0; tries < 12 && taken.some((other) => Math.abs(other - top) < 30); tries++) top = random(4, 62)
+    const sprite = image(name)
+    // A wide sprite (a ship, a plane) mustn't reach the disc: it shrinks within its box instead.
+    if (width) sprite.style.maxWidth = `${width}px`
+    ghost.append(sprite)
     ghost.dataset.side = side
-    ghost.style.cssText = `height:${height}px; top:${top}%; ${side}:${x}px;` +
-      `--turn:${random(-12, 12)}deg; --flip:${Math.random() < 0.5 ? 1 : -1}; --peak:${random(0.09, 0.17)};`
+    ghost.style.cssText = `height:${height}px; top:${top}px; ${side}:${x}px;` +
+      `--turn:${random(-12, 12)}deg; --flip:${Math.random() < 0.5 ? 1 : -1}; --peak:${peak};`
     if (still) ghost.classList.add('still')
     stage.append(ghost)
     ghost.addEventListener('animationend', () => ghost.remove())
