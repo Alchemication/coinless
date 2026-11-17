@@ -2,7 +2,7 @@ import Foundation
 
 /// Terminal commands, used by ./play in the project root.
 enum CLI {
-    static let commands: Set<String> = ["--check", "--list", "--play", "--previews", "--facts", "--help", "-h"]
+    static let commands: Set<String> = ["--check", "--list", "--play", "--previews", "--facts", "--inspect", "--help", "-h"]
 
     static let usage = """
     Usage: ./play [game] [options]
@@ -13,6 +13,8 @@ enum CLI {
       ./play --check            Check MAME, games.json, and the installed games
       ./play --previews         Capture missing library pictures now
       ./play --facts dino       Every fact about a game, with sources
+      ./play --inspect "final fight"
+                                What MAME needs to run a game, and a games.json entry to start from
 
     Options when playing:
       --window, --fullscreen    Override the full-screen setting
@@ -32,6 +34,7 @@ enum CLI {
             case "--play": return try play(Array(arguments.dropFirst()))
             case "--previews": return try previews()
             case "--facts": return try facts(Array(arguments.dropFirst()))
+            case "--inspect": return try inspect(arguments.dropFirst().joined(separator: " "))
             default: print(usage); return 0
             }
         } catch {
@@ -140,8 +143,13 @@ enum CLI {
             do {
                 if try library.loadFacts(game) == nil { notes.append("no facts yet (game-facts skill)") }
             } catch { notes.append(error.localizedDescription) }
-            if let supported = Library.driverSupportsSaves(game.id, mame: mame), supported != game.saveStates {
-                notes.append("games.json says saveStates: \(game.saveStates), but MAME reports \(supported ? "supported" : "unsupported")")
+            if let info = MachineInfo.load(game.id, mame: mame) {
+                if info.saveStates != game.saveStates {
+                    notes.append("games.json says saveStates: \(game.saveStates), but MAME reports \(info.saveStates ? "supported" : "unsupported")")
+                }
+                if Set(info.requires) != Set(game.requiredFiles) {
+                    notes.append("games.json requires \(game.requiredFiles), but MAME needs \(info.requires)")
+                }
             }
             warnings += notes.count
             print(notes.isEmpty
@@ -181,6 +189,35 @@ enum CLI {
         print("\nSources")
         for (index, source) in gameFacts.sources.enumerated() {
             print(style("  [\(index + 1)] ", .dim) + source.title + (source.url.map { style("  " + $0, .dim) } ?? ""))
+        }
+        return 0
+    }
+
+    /// Looks a game up in MAME: exact short name for details, anything else searches titles.
+    static func inspect(_ query: String) throws -> Int32 {
+        guard !query.isEmpty else { throw ArcadeError("What should I look up? For example: ./play --inspect \"final fight\"") }
+        guard let mame = Library.mameURL() else { throw ArcadeError("MAME isn't installed. Run: brew install mame") }
+        guard let info = MachineInfo.load(query.lowercased(), mame: mame) else {
+            let matches = MachineInfo.search(query, mame: mame)
+            guard !matches.isEmpty else { throw ArcadeError("MAME doesn't know “\(query)”. Try part of the title.") }
+            print("Games matching “\(query)” (parent sets only):\n")
+            let width = (matches.prefix(25).map(\.id.count).max() ?? 8) + 2
+            for match in matches.prefix(25) { print("  " + style(pad(match.id, width), .bold) + match.description) }
+            if matches.count > 25 { print(style("  …and \(matches.count - 25) more. Be more specific.", .dim)) }
+            print("\nDetails: ./play --inspect <name>")
+            return 0
+        }
+        print(style(info.description, .bold) + style("  [\(info.id)]", .dim))
+        print("\(info.year) · \(info.manufacturer) · \(info.players.map { "\($0) players" } ?? "? players") · \(info.buttons.map { "\($0) buttons" } ?? "? buttons")")
+        if let parent = info.cloneOf { print(style("A clone of \(parent). Prefer the parent set: ./play --inspect \(parent)", .yellow)) }
+        if let status = info.status, status != "good" { print(style("Emulation status: \(status). It may not play perfectly.", .yellow)) }
+        print("Save states: \(info.saveStates ? "supported" : "not supported")")
+        print("Files: \(([info.id] + info.requires).map { $0 + ".zip" }.joined(separator: ", "))"
+              + (info.requires.isEmpty ? "" : style("  (extras go in games/bios/)", .dim)))
+        if let library = try? Library(), let game = library.catalog.first(where: { $0.id == info.id }) {
+            print(style("Already in games.json as \(game.title)" + (library.isInstalled(game) ? ", installed." : ", not installed yet."), .green))
+        } else {
+            print("\nStarting point for launcher/games.json:\n" + info.catalogDraft)
         }
         return 0
     }

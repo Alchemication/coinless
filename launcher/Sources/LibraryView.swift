@@ -153,7 +153,7 @@ struct ArcadeView: View {
         ContentUnavailableView {
             Label("Your arcade is waiting", systemImage: "gamecontroller")
         } description: {
-            Text("Add game ZIPs to the folders listed in README.md, then refresh with R or △.\nIn Terminal, ./play shows which files each game needs.")
+            Text("Coinless ships no games. Ask your coding agent to “Add Final Fight”,\nor see docs/games.md. Then refresh with R or △.")
         } actions: {
             Button("Open games folder") {
                 if let root = model.library?.root { NSWorkspace.shared.open(root.appendingPathComponent("games")) }

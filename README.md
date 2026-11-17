@@ -2,172 +2,84 @@
 
 *No more CONTINUE? 9… 8… 7…*
 
-Remember digging through your pockets while the countdown ran out? Coinless is a personal, native Mac front end for [MAME](https://www.mamedev.org/), made for playing arcade games from the couch. Open **Coinless**, browse your games with a PS4 controller, keyboard, or trackpad, and press ✕ to play. Quit a game and you're back in the library, with your place saved.
+Remember digging through your pockets while the countdown ran out? Coinless is a native Mac front end for [MAME](https://www.mamedev.org/), made for playing arcade games from the couch with a PS4 controller, keyboard or trackpad. Quit a game and you're back in the library, with your place saved.
 
-- **A carousel of round CRT screens.** Each game shows a real picture: where you left off when there's a save, otherwise a frame from its attract mode that MAME captures in the background.
-- **Stories behind the games.** Under the Play button, short researched facts turn over on their own: who made the game and why, trivia, tips and combos. No clicks needed.
-- **Resume or start over.** Supported games save automatically when you quit and resume next time. Press □ twice for a new game.
-- **Couch-first controls.** D-pad or stick (hold to scroll), ✕ to play, Options for settings. Settings can be changed from the controller too.
-- **The same setup from Terminal.** `./play dino` launches a game with the app's settings and shows the MAME command it runs.
-- **Display styles.** Smooth (OpenGL), sharp pixels, or a curved CRT shader (Metal).
+- **Round CRT screens** showing where you left off, or a frame from the game's attract mode.
+- **Stories behind the games:** short, sourced facts, tips and combos turn over under the Play button. No clicks needed.
+- **Resume or start over:** supported games save when you quit and resume next time.
+- **Couch-first:** everything works from the controller, settings included.
+- **Terminal too:** `./play dino` launches with the same settings and shows the MAME command.
 
-Built with SwiftUI, AppKit, and GameController, using your Homebrew MAME. No Xcode project, servers, or dependencies.
+Coinless ships no games. You add the ones you want, using game files you have the right to use.
 
-## Quick start
+## Setup
 
-1. Install MAME: `brew install mame` (see [brew.sh](https://brew.sh/) if Homebrew is missing).
-2. Install Apple's command-line tools if `xcrun swiftc` isn't available: `xcode-select --install`.
-3. Add game ZIPs under `games/`, following [the game guide](docs/games.md). Keep ZIPs compressed.
-4. Build and open:
+**With a coding agent (easiest).** Open this folder in Claude Code, Codex or another coding agent and say:
+
+> Set up Coinless
+
+then, for each game:
+
+> Add Final Fight
+
+The agent follows the project's skills (`.claude/skills/`): `setup` checks MAME and Apple's tools and builds the app; `add-game` finds the right MAME set, tells you which ZIPs to provide, verifies them, and adds pictures, facts and tips.
+
+**By hand.**
 
 ```sh
-zsh launcher/build.sh
+brew install mame                     # needs Homebrew: https://brew.sh
+xcode-select --install                # if `xcrun swiftc` is missing
+zsh launcher/build.sh                 # builds, signs and checks Coinless.app
+./play --inspect "final fight"        # which ZIPs a game needs
 open Coinless.app
 ```
 
-The build creates and locally signs `Coinless.app` in the project folder, then checks MAME, `games.json`, and your installed games. The app and game files aren't in Git, so build locally after cloning.
-
-Drag `Coinless.app` to the Dock for one-click access. It finds the project from its own location, so keep it in the project folder (moving the whole project is fine).
+Put each game's ZIP in `games/<folder>/` and BIOS or device ZIPs in `games/bios/`; [docs/games.md](docs/games.md) lists the catalog and explains adding new games. Keep `Coinless.app` in the project folder; drag it to the Dock for one-click access.
 
 ## Controls
 
 | Action | PS4 controller | Keyboard | Mouse / trackpad |
 | --- | --- | --- | --- |
-| Browse | D-pad or left stick (hold to keep moving) | ← → | Swipe or scroll; click a side game |
-| Next / previous fact (optional) | ↓ ↑ or R1 L1 | ↓ ↑ | Click the fact |
+| Browse | D-pad or left stick | ← → | Swipe; click a side game |
 | Play / Resume | ✕ | Return | Click the centre game |
-| New game (on a saved game) | □, twice | N, twice | Click **New game** twice |
-| Settings and help | Options (or ○) | ? or ⌘, | Sliders button, top right |
-| In settings | ↑ ↓ to move, ✕ to change, ○ to close | ↑ ↓, Return, Esc | Click |
-| Refresh the library | △ | R or ⌘R | Settings → Refresh games |
+| New game (on a saved game) | □, twice | N, twice | **New game**, twice |
+| Next fact (optional) | ↓ ↑ or R1 L1 | ↓ ↑ | Click the fact |
+| Settings | Options | ? or ⌘, | Sliders, top right |
+| Refresh the library | △ | R | Settings → Refresh games |
 
-Games start full screen by default; switch to windowed in Settings.
+**Back to the library from the couch:** in MAME, set a spare controller button once as **Tab → Input Settings → Input Assignments (general) → User Interface → UI Cancel**. Esc works on the keyboard.
 
-### Getting back to the library
+**TV:** mirror the display, or make the TV the main display before opening Coinless; games open on the main display.
 
-Quitting MAME returns you to Coinless. Esc quits on the keyboard. For the couch, assign a controller button once in MAME: **Tab → Input Settings → Input Assignments (general) → User Interface → UI Cancel**. Pick a button you don't use in games. Coinless never changes your MAME bindings.
+## Saves
 
-### Saves
+For games MAME can save (`./play` shows which), **quit normally** and your place is saved to `sta/<game>/auto.sta`; next time, **Resume**. New game keeps the old save as `auto.sta.bak`. Quitting Coinless mid-game still saves. Turn saving off in Settings.
 
-For games whose MAME driver supports save states, Coinless passes `-autosave`: **quit normally** and MAME saves your place in `sta/<game>/auto.sta`, and next time the button says **Resume**. Force-quitting or a crash may not save, and saves can stop working after MAME updates.
+For saves during play, set **Save State (Quick)** and **Load State (Quick)** in MAME's User Interface list, e.g. L3 and R3.
 
-- **Before the first auto-save**, Coinless resumes your newest manual save in `sta/<game>/`.
-- **New game** (□ or N, twice) moves `auto.sta` to `auto.sta.bak` and starts from the beginning. Your place is saved again when you quit.
-- **Turning off** "Save on exit, resume next time" plays without loading or saving. Your files stay in place.
-- **Quitting Coinless mid-game** asks MAME to exit cleanly first, so the auto-save is still written.
+Back up `cfg/`, `nvram/` and `sta/` yourself; Git doesn't hold them.
 
-`./play` shows which games have a save. Tekken 3 and Golden Axe can't save in the current MAME.
-
-For saves *during* a game, assign these in MAME's general **User Interface** list: **Save State (Quick)** to L3 and **Load State (Quick)** to R3 (click the sticks). Quick saves use their own slot, separate from the auto-save.
-
-### Library pictures
-
-Each game's picture lives in `art/<game>/`:
-
-| File | Shown when | Made by |
-| --- | --- | --- |
-| `resume.png` | You have a save to resume | Coinless, from a copy of your save, after each session |
-| `cover.png` or `cover.jpg` | Always, if present (instead of `attract.png`) | You |
-| `attract.png` | Otherwise | Coinless: MAME runs the game for about 50 seconds without video or sound |
-
-Captures run one at a time in the background and pause while you play. They use a temporary folder, so your settings, NVRAM, and saves are never touched. Set `previewAt` in `games.json` to capture a different moment. **Settings → Rebuild previews** or `./play --previews` regenerates them.
-
-### Game facts
-
-Each game's facts live in `launcher/facts/<id>.json`: 8–10 short lines on its origin, its makers, trivia, tips, combos and secrets, each with sources. One shows at a time under the Play button and turns over by itself; a thin bar shows how long until the next. The now-playing screen shows a tip, the marquee names the developer, and `./play` prints one fact per launch. `./play --facts <game>` lists them all with sources.
-
-Facts are researched with the `game-facts` agent skill (see `CLAUDE.md`) and are kept under 140 characters.
-
-### TV setup
-
-Use screen mirroring for the simplest setup. With an extended desktop, Coinless and MAME both use the **main display**, so make the TV the main display in **System Settings → Displays** before opening Coinless.
-
-## Playing from Terminal
-
-`./play` uses the same settings, saves, and launch options as the app:
+## Terminal
 
 ```sh
-./play                         # list games, what's missing, and which have saves
-./play dino                    # play (resumes a save if there is one)
-./play cad --window            # names can be shortened; play in a window
-./play sf2ce --style crt       # smooth, sharp, or crt
-./play hvnsgate --fresh        # start over (auto.sta is kept as auto.sta.bak)
-./play tekken3 --dry-run       # print the MAME command without running it
-./play --facts sf2             # every fact about a game, with sources
-./play --check                 # check MAME, games.json, and installed games
+./play                       # your games, what's missing, which have saves
+./play dino                  # play (names can be shortened: ./play cad)
+./play sf2ce --style crt     # smooth, sharp or crt; also --window, --fresh, --no-save
+./play --facts tekken3       # every fact, with sources
+./play --inspect mslug       # what MAME needs for a game
+./play --check               # check MAME, the catalog and your files
+./play --help                # everything else
 ```
-
-Each launch prints the full `mame` command, so you can copy it and tweak options. In a game: **5** adds a coin, **1** starts, **Tab** opens MAME's menu, **P** pauses, and **Esc** quits and saves.
-
-## Adding games
-
-The catalog is [launcher/games.json](launcher/games.json). The app reads it from the project each time it refreshes, so edits don't need a rebuild. A game appears once its ZIP exists at `games/<folder>/<id>.zip`.
-
-| Field | Meaning |
-| --- | --- |
-| `id` | MAME short name, also the ZIP name without `.zip` |
-| `folder` | Folder under `games/` |
-| `title`, `subtitle`, `genre`, `year`, `players`, `note` | Text shown in the library |
-| `symbol` | [SF Symbol](https://developer.apple.com/sf-symbols/) shown before a preview exists |
-| `color` | Accent colour, hex without `#` |
-| `saveStates` | Whether MAME can save this game. `./play --check` compares it with MAME |
-| `requires` | Optional. Extra BIOS/device ZIPs without `.zip`, e.g. `["qsound_hle"]` |
-| `previewAt` | Optional. Seconds of attract mode before the preview is captured (default 50) |
-
-BIOS and device ZIPs can sit next to the game ZIP or once in **`games/bios/`**, which every game searches. For example, a single `games/bios/qsound_hle.zip` serves Cadillacs and Dinosaurs, Shadow over Mystara, and Alien vs. Predator.
 
 ## Troubleshooting
 
-- **A game is missing from the library:** run `./play` to see the expected path and any missing BIOS files, then refresh (△ or R).
-- **MAME reports missing files:** verify the set with `mame <id> -rompath "games/<folder>;games/bios" -verifyroms`. See [the game guide](docs/games.md) for known warnings.
-- **A game closes with an error:** Coinless shows the reason and the end of MAME's output. The full log is `launcher/.build/mame-last.log`.
-- **Controls seem to have reset:** MAME stores them in `cfg/` relative to where it starts. Coinless and `./play` always start it from the project folder; if you run `mame` yourself, `cd` here first.
-- **The controller doesn't respond after a game:** for 20 seconds after a game ends, any controller press brings Coinless back to the front. After that, click the Coinless window once.
-
-## Project layout
-
-```text
-.
-├── play                      # Terminal launcher (./play --help)
-├── launcher/
-│   ├── Sources/              # The Mac app
-│   │   ├── App.swift         #   window, menus, app lifecycle
-│   │   ├── ArcadeModel.swift #   library state, launching, saves
-│   │   ├── Input.swift       #   controller, keyboard, trackpad
-│   │   ├── Library.swift     #   project paths, catalog, MAME arguments
-│   │   ├── Previews.swift    #   headless MAME screenshots
-│   │   ├── Facts.swift       #   game facts: format, loading, checks
-│   │   ├── FactTicker.swift  #   the rotating fact under Play
-│   │   ├── LibraryView.swift #   carousel and main screen
-│   │   ├── Disc.swift        #   round CRT screen, marquee, backdrop
-│   │   ├── HelpView.swift    #   settings and help
-│   │   ├── CLI.swift         #   ./play commands
-│   │   └── Catalog.swift     #   game model and theme
-│   ├── facts/                # Researched facts per game (<id>.json)
-│   ├── Tools/Icon.swift      # App icon generator
-│   ├── games.json            # Game catalog
-│   ├── Info.plist
-│   └── build.sh              # Build, sign, and check
-├── docs/games.md             # Per-game downloads, BIOS files, and controls
-├── CLAUDE.md, AGENTS.md      # Working rules for AI agents (kept identical)
-├── .claude/skills/          # Agent skills: game-tips, game-facts (.agents/skills links here)
-├── LICENSE                   # MIT
-├── Coinless.app/               # Generated
-├── art/                      # Generated library pictures (cover.png is yours)
-├── games/                    # Your ROM ZIPs; games/bios/ for shared BIOS files
-├── cfg/  nvram/  sta/        # MAME controls, machine data, and saves
-```
-
-`.gitignore` excludes the app, game files, pictures, saves, and local MAME data. **Back up `cfg/`, `nvram/`, and `sta/` separately**; a Git clone won't restore them.
-
-Other useful app flags: `Coinless --preview [game]` renders the library to `launcher/.build/preview.png`, and `Coinless --smoke-test` launches and quits a game headlessly in a sandbox.
+- **A game is missing:** `./play` shows the expected file and any missing BIOS, then refresh with △ or R.
+- **MAME says files are missing:** `mame <id> -rompath "games/<folder>;games/bios" -verifyroms`.
+- **A game closes with an error:** Coinless shows why; the full output is in `launcher/.build/mame-last.log`.
+- **The controller stops responding after a game:** press any button within 20 seconds, or click the Coinless window.
 
 ## Licence
 
-Coinless is MIT licensed (see [LICENSE](LICENSE)). It contains no MAME code: it runs your separately installed `mame`, which has its own [licence](https://docs.mamedev.org/license.html). Game ROMs, BIOS files and the games themselves belong to their owners and are not included. Facts are short summaries with links to their sources.
+MIT (see [LICENSE](LICENSE)). Coinless contains no MAME code: it runs your separately installed `mame`, which has its own [licence](https://docs.mamedev.org/license.html). It includes no ROMs, BIOS files or game content; obtaining them, and the right to use them, is up to you. Facts are short summaries that link to their sources.
 
-## References
-
-- [MAME default controls](https://docs.mamedev.org/usingmame/defaultkeys.html)
-- [MAME command-line options](https://docs.mamedev.org/commandline/commandline-all.html)
-- [MAME BGFX shaders](https://docs.mamedev.org/advanced/bgfx.html)
+Working on Coinless itself? [CLAUDE.md](CLAUDE.md) has the layout, rules and checks.

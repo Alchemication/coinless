@@ -203,22 +203,6 @@ struct Library: Sendable {
         return exists(share.appendingPathComponent("bgfx/chains/crt-geom.json")) ? share : nil
     }
 
-    /// Asks MAME whether a driver supports save states. Nil if MAME couldn't answer.
-    static func driverSupportsSaves(_ id: String, mame: URL) -> Bool? {
-        let task = Process()
-        task.executableURL = mame
-        task.arguments = [id, "-listxml"]
-        let pipe = Pipe()
-        task.standardOutput = pipe
-        task.standardError = FileHandle.nullDevice
-        guard (try? task.run()) != nil else { return nil }
-        let data = pipe.fileHandleForReading.readDataToEndOfFile()
-        task.waitUntilExit()
-        guard let xml = String(data: data, encoding: .utf8),
-              let range = xml.range(of: #"savestate="[a-z]+""#, options: .regularExpression) else { return nil }
-        return xml[range] == #"savestate="supported""#
-    }
-
     /// A plain-language reason for a MAME exit status (see MAME's documented exit codes).
     static func exitSummary(status: Int32, reason: Process.TerminationReason) -> String {
         if reason == .uncaughtSignal { return "MAME stopped unexpectedly (signal \(status))." }

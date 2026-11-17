@@ -21,29 +21,14 @@ Keep ZIPs compressed and keep their original names: MAME finds games by file nam
 
 Names, dependencies, and save support were checked against MAME 0.289. After a MAME update, run `./play --check` to recheck save support.
 
-### Downloads
+### Getting the files
 
-This setup used Planet Emulation's merged MAME sets. Use each page's Download section (JavaScript required) and pick the main merged set, not a clone or bootleg. These are third-party sources whose distribution rights haven't been verified.
-
-[hvnsgate](https://www.planetemu.net/en/rom/mame-roms-merged/hvnsgate) ·
-[coh1001l](https://www.planetemu.net/en/rom/mame-roms-merged/coh1001l) ·
-[dino](https://www.planetemu.net/en/rom/mame-roms-merged/dino) ·
-[qsound_hle](https://www.planetemu.net/en/rom/mame-roms-merged/qsound-hle) ·
-[tekken3](https://www.planetemu.net/en/rom/mame-roms-merged/tekken3) ·
-[sf2ce](https://www.planetemu.net/en/rom/mame-roms-merged/sf2ce) ·
-[ffight](https://www.planetemu.net/en/rom/mame-roms-merged/ffight) ·
-[goldnaxe](https://www.planetemu.net/en/rom/mame-roms-merged/goldnaxe) ·
-[kod](https://www.planetemu.net/en/rom/mame-roms-merged/kod) ·
-[knights](https://www.planetemu.net/en/rom/mame-roms-merged/knights) ·
-[ddsom](https://www.planetemu.net/en/rom/mame-roms-merged/ddsom) ·
-[avsp](https://www.planetemu.net/en/rom/mame-roms-merged/avsp)
-
-For example, from Downloads:
+Coinless doesn't provide game files. Use ROM sets you have the right to use, matching your MAME version. `./play --inspect <name>` lists the exact ZIPs a game needs. For example, with the files in Downloads:
 
 ```sh
 mkdir -p games/cadillacs-and-dinosaurs games/bios
-mv ~/Downloads/dino.zip games/cadillacs-and-dinosaurs/
-mv ~/Downloads/qsound_hle.zip games/bios/
+cp ~/Downloads/dino.zip games/cadillacs-and-dinosaurs/
+cp ~/Downloads/qsound_hle.zip games/bios/
 ./play            # Cadillacs should now say "ready"
 ```
 
@@ -91,6 +76,23 @@ MAME marks the graphics as imperfect and can't save this game. This is the arcad
 ### Street Fighter II
 
 Up jumps and down crouches. Hold away from your opponent to block, and down-away to block low. With Ryu or Ken, roll down to forward, then punch, for a fireball. Directions flip when you switch sides.
+
+## Adding a new game by hand
+
+An agent can do all of this with the `add-game` skill. By hand: run `./play --inspect "<title>"`, add its suggested entry to [launcher/games.json](../launcher/games.json) and fill in the TODOs. The app reads the catalog at every refresh, so no rebuild is needed.
+
+| Field | Meaning |
+| --- | --- |
+| `id` | MAME short name, also the ZIP name without `.zip` |
+| `folder` | Folder under `games/` |
+| `title`, `subtitle`, `genre`, `year`, `players`, `note` | Text shown in the library |
+| `symbol` | [SF Symbol](https://developer.apple.com/sf-symbols/) shown before a preview exists |
+| `color` | Accent colour, hex without `#` |
+| `saveStates` | Whether MAME can save this game (`./play --check` compares it with MAME) |
+| `requires` | Optional. Extra BIOS/device ZIPs without `.zip`, e.g. `["qsound_hle"]` |
+| `previewAt` | Optional. Seconds of attract mode before the preview is captured (default 50) |
+
+Optional extras: facts in `launcher/facts/<id>.json` (`game-facts` skill) and your own picture at `art/<id>/cover.png`.
 
 ## Zelda (not set up yet)
 
