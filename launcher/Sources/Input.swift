@@ -51,6 +51,7 @@ extension ArcadeModel {
 
     func activateHelpItem() {
         switch helpFocus {
+        case .quit: NSApp.terminate(nil); return
         case .fullscreen: fullscreen.toggle()
         case .autoResume: autoResume.toggle()
         case .display: cycleDisplayStyle(1)
@@ -99,9 +100,34 @@ extension ArcadeModel {
             pad.buttonY.pressedChangedHandler = onPress { $0.refresh() }   // △
             pad.leftShoulder.pressedChangedHandler = onPress { $0.stepFact(-1) }  // L1
             pad.rightShoulder.pressedChangedHandler = onPress { $0.stepFact(1) }  // R1
-            pad.buttonMenu.pressedChangedHandler = onPress { model in      // Options
+            let options = onPress { model in                               // Options
                 if model.notice != nil { model.notice = nil } else { model.help.toggle() }
             }
+            pad.buttonMenu.pressedChangedHandler = { [weak self] button, value, pressed in
+                options(button, value, pressed)
+                Task { @MainActor in self?.holdExitChord("options", pressed: pressed, pad: token) }
+            }
+            pad.buttonOptions?.pressedChangedHandler = { [weak self] _, _, pressed in   // Share
+                Task { @MainActor in self?.holdExitChord("share", pressed: pressed, pad: token) }
+            }
+        }
+    }
+
+    /// Options + Share held during a game quits it and returns to the library, saving like a normal quit.
+    /// Works in the background (MAME is frontmost); a hold, so a passing press of both never ends a game.
+    private func holdExitChord(_ button: String, pressed: Bool, pad: String) {
+        if pressed { exitChord[pad, default: []].insert(button) } else { exitChord[pad]?.remove(button) }
+        guard running != nil, exitChord.values.contains(where: { $0.count == 2 }) else {
+            exitTask?.cancel()
+            exitTask = nil
+            return
+        }
+        guard exitTask == nil else { return }
+        exitTask = Task { [weak self] in
+            try? await Task.sleep(for: .seconds(1.5))
+            guard let self, !Task.isCancelled else { return }
+            self.exitTask = nil
+            self.endGame()
         }
     }
 

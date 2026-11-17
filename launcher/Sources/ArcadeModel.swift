@@ -8,7 +8,7 @@ import GameController
         let message: String
     }
 
-    enum HelpItem: Int, CaseIterable { case fullscreen, autoResume, display, music, interfaceSounds }
+    enum HelpItem: Int, CaseIterable { case fullscreen, autoResume, display, music, interfaceSounds, quit }
 
     @Published private(set) var games: [Game] = []
     @Published var selection = 0 {
@@ -70,6 +70,8 @@ import GameController
     var repeatTasks: [String: Task<Void, Never>] = [:]
     var returnDeadline: Date?
     var scrollAccumulator: CGFloat = 0
+    var exitChord: [String: Set<String>] = [:]
+    var exitTask: Task<Void, Never>?
 
     init() {
         do { library = try Library() } catch {
@@ -316,6 +318,10 @@ import GameController
     }
 
     /// Asks MAME to quit. MAME handles SIGTERM like a normal exit, so it still writes its automatic save.
+    /// Ends the running game like a normal quit: SIGTERM is a clean exit, so MAME still writes auto.sta,
+    /// and the usual return to the library follows.
+    func endGame() { process?.terminate() }
+
     func stopGame(then completion: @escaping () -> Void) {
         guard let process else { completion(); return }
         quitAfterGame = completion

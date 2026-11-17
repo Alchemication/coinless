@@ -60,13 +60,24 @@ struct HelpView: View {
                 SettingRow(focused: model.helpFocus == .interfaceSounds) {
                     Toggle("Interface sounds", isOn: $model.interfaceSounds)
                 }
+                SettingRow(focused: model.helpFocus == .quit) {
+                    Button { NSApp.terminate(nil) } label: {
+                        HStack {
+                            Label("Quit Coinless", systemImage: "power")
+                            Spacer()
+                            Text("⌘Q").foregroundStyle(.secondary)
+                        }
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                }
 
                 Divider().padding(.vertical, 4)
 
                 section("Back to your collection",
-                        "Quit a game with Esc. For couch play, set a spare controller button as UI Cancel in MAME: Tab → Input Settings → Input Assignments (general) → User Interface. Your game controls stay as they are.")
+                        "During a game, hold Options + Share for a moment, or press Esc. It quits like a normal exit, so saving works as usual.")
                 section("Quick saves during play",
-                        "In the same User Interface list, set Save State (Quick) to L3 and Load State (Quick) to R3 (click the sticks). Use a button combination if you click the sticks by accident.")
+                        "In MAME, press Tab → Input Settings → Input Assignments (general) → User Interface, and set Save State (Quick) to L3 and Load State (Quick) to R3 (click the sticks). Use a button combination if you click the sticks by accident.")
                 section("Starting over",
                         "On a saved game, press □ or N twice. The previous auto-save is kept as sta/<game>/auto.sta.bak.")
                 section("Library pictures",

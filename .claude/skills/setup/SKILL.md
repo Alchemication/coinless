@@ -28,7 +28,7 @@ Coinless ships no games. Run `./play` to show the catalog, then ask which games 
 ## 4. Hand over
 
 - `open Coinless.app`. Suggest dragging it to the Dock; it must stay in the project folder.
-- One-time MAME binding for the couch (only the user can do this, in MAME): Tab → Input Settings → Input Assignments (general) → User Interface → UI Cancel → a spare controller button. Optional quick saves: Save State (Quick) to L3, Load State (Quick) to R3.
+- Back to the library from a game: hold Options + Share (Coinless handles it; no MAME setup). Optional quick saves, set by the user in MAME: Tab → Input Settings → Input Assignments (general) → User Interface → Save State (Quick) to L3, Load State (Quick) to R3.
 - Remind them to back up `cfg/`, `nvram/` and `sta/`; Git doesn't hold them.
 
 ## After pulling changes

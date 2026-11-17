@@ -169,7 +169,7 @@ struct ArcadeView: View {
             Hint(keys: "✕ ⏎", label: model.resumeAvailable ? "Resume" : "Play")
             if model.resumeAvailable { Hint(keys: "□ N", label: "New game") }
             Hint(keys: "△ R", label: "Refresh")
-            Hint(keys: "OPTIONS ?", label: "Settings")
+            Hint(keys: "OPTIONS ?", label: "Settings · Quit")
             Spacer()
             Text("\(model.games.count) GAME\(model.games.count == 1 ? "" : "S") · NO MORE CONTINUE? 9… 8… 7…")
                 .foregroundStyle(.white.opacity(0.3))
@@ -247,7 +247,7 @@ struct NowPlaying: View {
                 Disc(game: game, image: image, selected: true, saved: false, diameter: 260,
                      marquee: "NOW PLAYING • \(game.title.uppercased()) • ")
                 Text("Enjoy the game.").font(.system(size: 40, weight: .bold, design: .rounded))
-                Text("Quit MAME to come back here: press Esc, or the controller button you set as UI Cancel.")
+                Text("Hold Options + Share, or press Esc, to come back here.")
                     .multilineTextAlignment(.center)
                     .font(.system(size: 14))
                     .foregroundStyle(.white.opacity(0.55))

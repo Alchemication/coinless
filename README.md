@@ -73,8 +73,10 @@ Put each game's ZIP in `games/<folder>/` and BIOS or device ZIPs in `games/bios/
 | Next fact (optional) | ↓ ↑ or R1 L1 | ↓ ↑ | Click the fact |
 | Settings | Options | ? or ⌘, | Sliders, top right |
 | Refresh the library | △ | R | Settings → Refresh games |
+| Back to the library (in a game) | Hold Options + Share | Esc | |
+| Quit Coinless | Options, then **Quit Coinless** | ⌘Q | Settings → **Quit Coinless** |
 
-**Back to the library from the couch:** in MAME, set a spare controller button once as **Tab → Input Settings → Input Assignments (general) → User Interface → UI Cancel**. Esc works on the keyboard.
+**Back to the library from the couch:** hold **Options + Share** for a moment during a game. It quits like a normal exit, so saving works as usual. Esc works on the keyboard.
 
 **Sound:** seven quiet original themes, one for each day of the week, drift into one another on the library and fade out while you play, with soft sounds as you browse and start games. Settings shows what's playing (← → for another theme); `./play --sounds` plays them all.
 
