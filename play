@@ -8,6 +8,6 @@ if [[ ! -x "$APP" ]]; then
 fi
 case "${1:-}" in
   "") exec "$APP" --list ;;
-  --check|--previews|--facts|--inspect|--help|-h) exec "$APP" "$@" ;;
+  --check|--previews|--facts|--inspect|--sounds|--help|-h) exec "$APP" "$@" ;;
   *) exec "$APP" --play "$@" ;;
 esac

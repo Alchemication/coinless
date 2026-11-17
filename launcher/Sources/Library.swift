@@ -60,6 +60,14 @@ enum Preferences {
         get { defaults.string(forKey: "displayStyle").flatMap(DisplayStyle.init(rawValue:)) ?? .smooth }
         set { defaults.set(newValue.rawValue, forKey: "displayStyle") }
     }
+    static var interfaceSounds: Bool {
+        get { defaults.object(forKey: "interfaceSounds") as? Bool ?? true }
+        set { defaults.set(newValue, forKey: "interfaceSounds") }
+    }
+    static var music: Bool {
+        get { defaults.object(forKey: "music") as? Bool ?? true }
+        set { defaults.set(newValue, forKey: "music") }
+    }
     static var lastGame: String? {
         get { defaults.string(forKey: "lastGame") }
         set { defaults.set(newValue, forKey: "lastGame") }

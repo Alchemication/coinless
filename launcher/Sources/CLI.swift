@@ -1,8 +1,9 @@
+import AVFoundation
 import Foundation
 
 /// Terminal commands, used by ./play in the project root.
 enum CLI {
-    static let commands: Set<String> = ["--check", "--list", "--play", "--previews", "--facts", "--inspect", "--help", "-h"]
+    static let commands: Set<String> = ["--check", "--list", "--play", "--previews", "--facts", "--inspect", "--sounds", "--help", "-h"]
 
     static let usage = """
     Usage: ./play [game] [options]
@@ -13,6 +14,7 @@ enum CLI {
       ./play --check            Check MAME, games.json, and the installed games
       ./play --previews         Capture missing library pictures now
       ./play --facts dino       Every fact about a game, with sources
+      ./play --sounds           Hear the app's interface sounds and background music
       ./play --inspect "final fight"
                                 What MAME needs to run a game, and a games.json entry to start from
 
@@ -35,6 +37,7 @@ enum CLI {
             case "--previews": return try previews()
             case "--facts": return try facts(Array(arguments.dropFirst()))
             case "--inspect": return try inspect(arguments.dropFirst().joined(separator: " "))
+            case "--sounds": return try sounds()
             default: print(usage); return 0
             }
         } catch {
@@ -219,6 +222,31 @@ enum CLI {
         } else {
             print("\nStarting point for launcher/games.json:\n" + info.catalogDraft)
         }
+        return 0
+    }
+
+    /// Plays every interface cue with its name, then a stretch of the background bed.
+    static func sounds() throws -> Int32 {
+        let engine = AVAudioEngine()
+        let player = AVAudioPlayerNode()
+        let format = AVAudioFormat(standardFormatWithSampleRate: Synth.sampleRate, channels: 1)!
+        engine.attach(player)
+        engine.connect(player, to: engine.mainMixerNode, format: format)
+        do { try engine.start() } catch { throw ArcadeError("Couldn't open the audio output: \(error.localizedDescription)") }
+        func play(_ samples: [Float], for seconds: Double) {
+            guard let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: AVAudioFrameCount(samples.count)) else { return }
+            buffer.frameLength = AVAudioFrameCount(samples.count)
+            samples.withUnsafeBufferPointer { buffer.floatChannelData![0].update(from: $0.baseAddress!, count: samples.count) }
+            player.scheduleBuffer(buffer, at: nil)
+            player.play()
+            Thread.sleep(forTimeInterval: seconds)
+        }
+        for cue in Cue.allCases {
+            print(style(pad(cue.rawValue, 10), .bold) + cue.meaning)
+            play(Synth.samples(cue), for: Sounds.duration(cue) + 0.45)
+        }
+        print(style(pad("bed", 10), .bold) + "background music on the library (12 seconds of the 24-second loop)")
+        play(Synth.bed(), for: 12)
         return 0
     }
 

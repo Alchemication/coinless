@@ -41,6 +41,17 @@ struct HelpView: View {
                     }
                 }
 
+                SettingRow(focused: model.helpFocus == .music) {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Toggle("Background music", isOn: $model.music)
+                        Text("A quiet retro loop on the library screen. It fades out while you play.")
+                            .font(.caption).foregroundStyle(.secondary)
+                    }
+                }
+                SettingRow(focused: model.helpFocus == .interfaceSounds) {
+                    Toggle("Interface sounds", isOn: $model.interfaceSounds)
+                }
+
                 Divider().padding(.vertical, 4)
 
                 section("Back to your collection",
@@ -62,7 +73,7 @@ struct HelpView: View {
             }
             .padding(32)
         }
-        .frame(width: 680, height: 700)
+        .frame(width: 680, height: 760)
         .preferredColorScheme(.dark)
     }
 

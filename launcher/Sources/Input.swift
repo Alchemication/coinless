@@ -21,8 +21,10 @@ extension ArcadeModel {
         if help {
             let items = HelpItem.allCases
             switch direction {
-            case .up: helpFocus = items[max(helpFocus.rawValue - 1, 0)]
-            case .down: helpFocus = items[min(helpFocus.rawValue + 1, items.count - 1)]
+            case .up, .down:
+                let target = items[min(max(helpFocus.rawValue + (direction == .up ? -1 : 1), 0), items.count - 1)]
+                sounds.play(target == helpFocus ? .bump : .move)
+                helpFocus = target
             case .left, .right: if helpFocus == .display { cycleDisplayStyle(direction == .right ? 1 : -1) }
             }
             return
@@ -50,7 +52,10 @@ extension ArcadeModel {
         case .fullscreen: fullscreen.toggle()
         case .autoResume: autoResume.toggle()
         case .display: cycleDisplayStyle(1)
+        case .music: music.toggle()
+        case .interfaceSounds: interfaceSounds.toggle()
         }
+        sounds.play(.open)
     }
 
     func cycleDisplayStyle(_ step: Int) {

@@ -8,15 +8,17 @@ import GameController
         let message: String
     }
 
-    enum HelpItem: Int, CaseIterable { case fullscreen, autoResume, display }
+    enum HelpItem: Int, CaseIterable { case fullscreen, autoResume, display, music, interfaceSounds }
 
     @Published private(set) var games: [Game] = []
     @Published var selection = 0 {
         didSet { if selection != oldValue { confirmingFresh = nil; restartFacts() } }
     }
     @Published private(set) var running: Game?
-    @Published var notice: Notice?
-    @Published var help = false { didSet { if help != oldValue { helpFocus = .fullscreen } } }
+    @Published var notice: Notice? { didSet { if notice != nil && oldValue == nil { sounds.play(.error) } } }
+    @Published var help = false {
+        didSet { if help != oldValue { helpFocus = .fullscreen; sounds.play(help ? .open : .close) } }
+    }
     @Published var helpFocus: HelpItem = .fullscreen
     @Published var controllerCount = 0
     /// Games with a save that the next launch will resume.
@@ -36,6 +38,14 @@ import GameController
     @Published var fullscreen = Preferences.fullscreen { didSet { Preferences.fullscreen = fullscreen } }
     @Published var autoResume = Preferences.autoResume { didSet { Preferences.autoResume = autoResume; reloadArtwork() } }
     @Published var displayStyle = Preferences.displayStyle { didSet { Preferences.displayStyle = displayStyle } }
+    @Published var music = Preferences.music { didSet { Preferences.music = music; updateBed() } }
+    @Published var interfaceSounds = Preferences.interfaceSounds {
+        didSet { Preferences.interfaceSounds = interfaceSounds; sounds.enabled = interfaceSounds && !Self.quiet }
+    }
+    /// Soft interface cues and the background bed (Sounds.swift).
+    let sounds = Sounds(enabled: Preferences.interfaceSounds && !ArcadeModel.quiet)
+    /// The smoke test and --preview stay silent.
+    static var quiet: Bool { isSmokeTest || isPreview }
 
     let library: Library?
     /// Brings the launcher window to the front; set by the app delegate.
@@ -65,6 +75,11 @@ import GameController
         }
         // Keep receiving controller input if macOS doesn't hand focus back after a game; see acceptsController.
         GCController.shouldMonitorBackgroundEvents = true
+        for name in [NSApplication.didBecomeActiveNotification, NSApplication.didResignActiveNotification] {
+            observers.append(NotificationCenter.default.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in
+                Task { @MainActor in self?.updateBed() }
+            })
+        }
         for name in [Notification.Name.GCControllerDidConnect, .GCControllerDidDisconnect] {
             observers.append(NotificationCenter.default.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in
                 Task { @MainActor in self?.configureControllers() }
@@ -93,12 +108,14 @@ import GameController
 
     func select(_ index: Int) {
         guard games.indices.contains(index), index != selection else { return }
+        sounds.play(.move)
         withAnimation(.spring(response: 0.45, dampingFraction: 0.82)) { selection = index }
     }
 
     func move(_ delta: Int) {
         guard running == nil, !help, notice == nil, !games.isEmpty else { return }
-        select(min(max(selection + delta, 0), games.count - 1))
+        let target = min(max(selection + delta, 0), games.count - 1)
+        if target == selection { sounds.play(.bump) } else { select(target) }
     }
 
     private func refreshSaves() {
@@ -111,6 +128,13 @@ import GameController
             let url = Previews.image(for: game, in: library, showResume: hasResume(game))
             artwork[game.id] = url.flatMap { NSImage(contentsOf: $0) }
         }
+    }
+
+    // MARK: Sound
+
+    /// The bed plays only on the library: music on, no game running, the app in front.
+    func updateBed() {
+        sounds.bed(playing: music && running == nil && !Self.quiet && NSApp?.isActive == true)
     }
 
     // MARK: Facts
@@ -209,6 +233,7 @@ import GameController
             launch(fresh: true)
             return
         }
+        sounds.play(.warn)
         withAnimation(.easeOut(duration: 0.2)) { confirmingFresh = game.id }
         confirmTask?.cancel()
         confirmTask = Task { [weak self] in
@@ -273,7 +298,9 @@ import GameController
             log = output
             process = task
             playingTip = facts[game.id]?.facts.filter(\.kind.isAdvice).randomElement()
+            sounds.play(.start)
             withAnimation(.easeInOut(duration: 0.3)) { running = game }
+            updateBed()
             if !Self.isSmokeTest { Preferences.lastGame = game.id }
         } catch {
             try? log?.close()
@@ -318,6 +345,8 @@ import GameController
         }
         refreshSaves()
         reloadArtwork(game)
+        if !failed { sounds.play(.welcome) }
+        updateBed()
         // macOS may not give focus back right away; accept controller input for a while regardless.
         returnDeadline = Date().addingTimeInterval(20)
         onReturn?()
