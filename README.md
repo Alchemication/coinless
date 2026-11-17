@@ -2,7 +2,13 @@
 
 *No more CONTINUE? 9… 8… 7…*
 
-Remember digging through your pockets while the countdown ran out? Coinless is a native Mac front end for [MAME](https://www.mamedev.org/), made for playing arcade games from the couch.
+Coinless is a native Mac front end for [MAME](https://www.mamedev.org/), made for playing arcade games from the couch. It keeps everything we loved about the arcade (the glowing cabinets, the attract screens, the marquees, the stories) and loses only the coin slot.
+
+### Then: the arcade
+
+![Pixel art: a child in a striped T-shirt stands at a glowing arcade cabinet with both pockets turned out, while the screen counts down CONTINUE? 9 and a last coin rolls away under the next machine](docs/images/then.png)
+
+One cabinet, one game, and a countdown racing through your pockets. We loved every second of it.
 
 ### Before: MAME from Terminal
 

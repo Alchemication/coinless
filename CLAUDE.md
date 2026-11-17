@@ -80,7 +80,7 @@ try on the couch.
 |---|---|
 | `README.md` | For players: what Coinless is, setup (agent or by hand), controls, saves, `./play`, troubleshooting, licence. Keep it short. |
 | `launcher/facts/<id>.json` | Researched facts per game, shown in the library ticker and by `./play`. Written with `game-facts`. |
-| `docs/images/` | README's before/after images, rendered by `launcher/Tools/readme-images.sh` (never edit by hand). |
+| `docs/images/` | README's then/before/after images, rendered by `launcher/Tools/readme-images.sh` (never edit by hand). `then.png` is original pixel art, drawn in `ReadmeArt.swift`. |
 | `docs/games.md` | The catalog: folders, BIOS/device files, save support, ROM checks, button layouts, game notes, adding a game by hand (catalog fields). |
 | `CLAUDE.md` / `AGENTS.md` | Working rules (this file). |
 | `.claude/skills/*/SKILL.md` | Procedures: `setup` (first install, rebuilds), `add-game` (a game end to end), `game-facts` (research into `launcher/facts/`), `game-tips` (coaching, `references/<game>.md` per game). |
