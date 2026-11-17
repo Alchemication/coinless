@@ -11,7 +11,9 @@ import GameController
     enum HelpItem: Int, CaseIterable { case fullscreen, autoResume, display }
 
     @Published private(set) var games: [Game] = []
-    @Published var selection = 0 { didSet { if selection != oldValue { confirmingFresh = nil } } }
+    @Published var selection = 0 {
+        didSet { if selection != oldValue { confirmingFresh = nil; restartFacts() } }
+    }
     @Published private(set) var running: Game?
     @Published var notice: Notice?
     @Published var help = false { didSet { if help != oldValue { helpFocus = .fullscreen } } }
@@ -23,6 +25,14 @@ import GameController
     @Published private(set) var previewStatus: String?
     /// Set after the first New Game press; a second press confirms.
     @Published private(set) var confirmingFresh: String?
+    /// Researched facts per game id, from launcher/facts/.
+    @Published private(set) var facts: [String: GameFacts] = [:]
+    /// Which fact each game is showing; starts at a random one each session.
+    @Published private(set) var factPosition: [String: Int] = [:]
+    /// Bumped whenever a fact's reading timer restarts, so the view restarts its progress bar.
+    @Published private(set) var factCycle = 0
+    /// A tip shown on the now-playing screen.
+    @Published private(set) var playingTip: GameFacts.Fact?
     @Published var fullscreen = Preferences.fullscreen { didSet { Preferences.fullscreen = fullscreen } }
     @Published var autoResume = Preferences.autoResume { didSet { Preferences.autoResume = autoResume; reloadArtwork() } }
     @Published var displayStyle = Preferences.displayStyle { didSet { Preferences.displayStyle = displayStyle } }
@@ -41,6 +51,7 @@ import GameController
     private var previewTask: Task<Void, Never>?
     private var previewGeneration = 0
     private var confirmTask: Task<Void, Never>?
+    private var factTask: Task<Void, Never>?
     // Controller and trackpad state, used by Input.swift.
     var heldDirections: [String: Direction] = [:]
     var repeatTasks: [String: Task<Void, Never>] = [:]
@@ -76,6 +87,7 @@ import GameController
         selection = games.firstIndex { $0.id == previous } ?? min(selection, max(0, games.count - 1))
         refreshSaves()
         reloadArtwork()
+        loadFacts()
         updatePreviews()
     }
 
@@ -98,6 +110,50 @@ import GameController
         for game in only.map({ [$0] }) ?? games {
             let url = Previews.image(for: game, in: library, showResume: hasResume(game))
             artwork[game.id] = url.flatMap { NSImage(contentsOf: $0) }
+        }
+    }
+
+    // MARK: Facts
+
+    /// The fact on screen for the selected game, with its place in the list.
+    var currentFact: (fact: GameFacts.Fact, index: Int, count: Int)? {
+        guard let game = active, let list = facts[game.id]?.facts, !list.isEmpty else { return nil }
+        let index = (factPosition[game.id] ?? 0) % list.count
+        return (list[index], index, list.count)
+    }
+
+    private func loadFacts() {
+        guard let library else { return }
+        var loaded: [String: GameFacts] = [:]
+        for game in games {
+            guard let gameFacts = try? library.loadFacts(game) else { continue }
+            loaded[game.id] = gameFacts
+            if factPosition[game.id] == nil { factPosition[game.id] = Int.random(in: 0..<gameFacts.facts.count) }
+        }
+        facts = loaded
+        restartFacts()
+    }
+
+    /// Steps through the selected game's facts; ↑ ↓, L1 R1, or a click.
+    func stepFact(_ delta: Int) {
+        guard running == nil, !help, notice == nil,
+              let game = active, let count = facts[game.id]?.facts.count, count > 0 else { return }
+        withAnimation(.easeInOut(duration: 0.35)) {
+            factPosition[game.id] = ((factPosition[game.id] ?? 0) + delta % count + count) % count
+        }
+        restartFacts()
+    }
+
+    /// Restarts the reading timer; when it runs out the next fact appears. Waits while anything covers the library.
+    func restartFacts() {
+        factTask?.cancel()
+        factCycle += 1
+        guard let current = currentFact, !Self.isPreview else { return }
+        let wait = GameFacts.readingTime(current.fact.text)
+        factTask = Task { [weak self] in
+            try? await Task.sleep(for: .seconds(wait))
+            guard !Task.isCancelled, let self else { return }
+            if self.running == nil, !self.help, self.notice == nil { self.stepFact(1) } else { self.restartFacts() }
         }
     }
 
@@ -213,6 +269,7 @@ import GameController
             try task.run()
             log = output
             process = task
+            playingTip = facts[game.id]?.facts.filter(\.kind.isAdvice).randomElement()
             withAnimation(.easeInOut(duration: 0.3)) { running = game }
             if !Self.isSmokeTest { Preferences.lastGame = game.id }
         } catch {

@@ -2,7 +2,7 @@ import Foundation
 
 /// Terminal commands, used by ./play in the project root.
 enum CLI {
-    static let commands: Set<String> = ["--check", "--list", "--play", "--previews", "--help", "-h"]
+    static let commands: Set<String> = ["--check", "--list", "--play", "--previews", "--facts", "--help", "-h"]
 
     static let usage = """
     Usage: ./play [game] [options]
@@ -12,6 +12,7 @@ enum CLI {
       ./play cad                Names can be shortened, or use the folder name
       ./play --check            Check MAME, games.json, and the installed games
       ./play --previews         Capture missing library pictures now
+      ./play --facts dino       Every fact about a game, with sources
 
     Options when playing:
       --window, --fullscreen    Override the full-screen setting
@@ -30,6 +31,7 @@ enum CLI {
             case "--list": return try list()
             case "--play": return try play(Array(arguments.dropFirst()))
             case "--previews": return try previews()
+            case "--facts": return try facts(Array(arguments.dropFirst()))
             default: print(usage); return 0
             }
         } catch {
@@ -103,6 +105,9 @@ enum CLI {
         let arguments = library.arguments(game, fullscreen: fullscreen, mode: mode, style: displayStyle, mame: mame)
         print(style("▶ \(game.title)", .bold) + (resuming ? " · resuming your saved game" : mode == .fresh ? " · starting fresh" : ""))
         print(style("  cd " + Library.shellQuoted([library.root.path]) + " && " + Library.shellQuoted(["mame"] + arguments), .dim))
+        if let fact = try? library.loadFacts(game)?.facts.randomElement() {
+            print(style("  \(fact.kind.label.capitalized): ", .bold) + fact.text)
+        }
         if dryRun { return 0 }
         if mode == .fresh, try library.setAsideAutosave(game) {
             print(style("  Previous auto-save kept as sta/\(game.id)/auto.sta.bak", .dim))
@@ -132,6 +137,9 @@ enum CLI {
             var notes: [String] = []
             let missing = library.missingFiles(game)
             if !missing.isEmpty { notes.append("missing " + missing.map { $0 + ".zip" }.joined(separator: ", ")) }
+            do {
+                if try library.loadFacts(game) == nil { notes.append("no facts yet (game-facts skill)") }
+            } catch { notes.append(error.localizedDescription) }
             if let supported = Library.driverSupportsSaves(game.id, mame: mame), supported != game.saveStates {
                 notes.append("games.json says saveStates: \(game.saveStates), but MAME reports \(supported ? "supported" : "unsupported")")
             }
@@ -154,6 +162,25 @@ enum CLI {
             print("Capturing \(kind.rawValue) picture for \(game.title)…", terminator: " ")
             fflush(stdout)
             do { try previews.capture(game, kind); print(style("done", .green)) } catch { print(style(error.localizedDescription, .yellow)) }
+        }
+        return 0
+    }
+
+    static func facts(_ arguments: [String]) throws -> Int32 {
+        guard let query = arguments.first else { throw ArcadeError("Which game? For example: ./play --facts dino") }
+        let library = try Library()
+        let game = try find(query, in: library.catalog)
+        guard let gameFacts = try library.loadFacts(game) else {
+            throw ArcadeError("No facts for \(game.title) yet. Add launcher/facts/\(game.id).json with the game-facts skill.")
+        }
+        print(style(game.title, .bold) + style("  by \(gameFacts.developer)", .dim) + "\n")
+        for fact in gameFacts.facts {
+            let refs = fact.sources.map { "[\($0 + 1)]" }.joined()
+            print(style(pad(fact.kind.label, 14), .bold) + fact.text + style(" " + refs, .dim))
+        }
+        print("\nSources")
+        for (index, source) in gameFacts.sources.enumerated() {
+            print(style("  [\(index + 1)] ", .dim) + source.title + (source.url.map { style("  " + $0, .dim) } ?? ""))
         }
         return 0
     }

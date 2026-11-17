@@ -5,7 +5,7 @@ description: Practical tips, combos, special moves, boss tactics, and practice d
 
 # Game Tips
 
-- Read the relevant reference below; use [local setup](references/local-setup.md) only for bindings or saves. Setup commands belong in the project README.
+- Read the relevant reference below, and the game's `launcher/facts/<id>.json` (its `tip` and `combo` lines are verified and shown in the app); use [local setup](references/local-setup.md) only for bindings or saves. Setup commands belong in the project README.
 - Give actionable advice: input, when to use it, and a short drill. Ask character/stage only when needed. Avoid unsolicited spoilers.
 - Use game actions, not assumed keyboard/controller buttons. Explain directions relative to the opponent, sequences, and simultaneous presses.
 - Verify exact moves in the linked guide; distinguish arcade editions from ports and sequels. Cite the relevant source and state uncertainty. Keep source summaries brief.

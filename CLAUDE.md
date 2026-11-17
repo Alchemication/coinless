@@ -79,9 +79,11 @@ try on the couch.
 | File | What it holds |
 |---|---|
 | `README.md` | What Coinless is, setup, controls, saves, pictures, `./play`, adding games, troubleshooting, layout. |
+| `launcher/facts/<id>.json` | Researched facts per game, shown in the library ticker and by `./play`. Written with `game-facts`. |
 | `docs/games.md` | Per game: folder, BIOS/device files, save support, downloads, ROM checks, button layouts, notes. |
 | `CLAUDE.md` / `AGENTS.md` | Working rules (this file). |
-| `.claude/skills/*/SKILL.md` | Procedures: `game-tips` (coaching, with `references/<game>.md` per game). |
+| `.claude/skills/*/SKILL.md` | Procedures: `game-tips` (coaching, with `references/<game>.md` per game), `game-facts` (research a game into `launcher/facts/`). |
+| `LICENSE` | MIT. Coinless runs MAME as a separate program and bundles no MAME code, ROMs or game content. |
 
 Keep `AGENTS.md` and `CLAUDE.md` identical. When editing either, update both.
 Adding, renaming or removing a doc updates this table and README's layout.
@@ -105,7 +107,8 @@ settings text (`HelpView`) together. A change to `./play` updates
 - **Files by job** (`launcher/Sources/`), each well under ~400 lines:
   `Library` (paths, catalog, MAME arguments, `Preferences`), `ArcadeModel`
   (state, launching, saves, previews), `Input` (pad, keyboard, trackpad),
-  `Previews` (headless captures), `LibraryView` / `Disc` / `HelpView` (UI),
+  `Previews` (headless captures), `Facts` (facts format and checks),
+  `LibraryView` / `Disc` / `FactTicker` / `HelpView` (UI),
   `App` (window, menus, lifecycle), `CLI` (`./play`), `Catalog` (`Game`,
   `Theme`). A new job gets a new file; `build.sh` picks it up.
 - **Input:** every control routes through the verbs in `Input.swift`
@@ -121,8 +124,13 @@ settings text (`HelpView`) together. A change to `./play` updates
   alone.
 - **Destructive actions** need a second press (New game) and keep a backup
   (`auto.sta.bak`).
+- **Facts** stay short (`GameFacts.maxLength`, 140 characters), sourced,
+  and about the arcade version. The ticker never needs a press: anything
+  added there must work hands-off.
 - **Catalog changes** keep `Library.validate` strict: a bad `games.json`
   fails with a message naming the entry.
+- **Licence:** MIT. Never vendor MAME code, ROMs, BIOS files, game art or
+  long copied text; link to sources instead.
 - **No backward-compat shims:** when moving code, update all callers. One
   exception: `Preferences.migrateFromArcade` (settings from the old app name).
 
@@ -156,5 +164,7 @@ Before reporting done:
 2. Row in `docs/games.md` (files, download, buttons).
 3. `references/<game>.md` in the `game-tips` skill, and a line in its
    `SKILL.md`.
-4. Once the ZIP is in place: `./play --check`, `./play --previews`, then
+4. Facts: `launcher/facts/<id>.json`, with the `game-facts` skill.
+   `./play --check` flags a game without them.
+5. Once the ZIP is in place: `./play --check`, `./play --previews`, then
    look at `art/<id>/attract.png`. Set `previewAt` if the moment is dull.

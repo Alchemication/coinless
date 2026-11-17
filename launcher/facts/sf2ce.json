@@ -1,0 +1,21 @@
+{
+  "developer": "Capcom",
+  "facts": [
+    { "kind": "origin", "text": "The first upgrade of Street Fighter II, released in 1992. In Japan it's Street Fighter II Dash.", "sources": [0] },
+    { "kind": "trivia", "text": "The first time you could play the four bosses: Balrog, Vega, Sagat and M. Bison.", "sources": [0] },
+    { "kind": "trivia", "text": "It added the series' first mirror matches. The copy's colours depend on which button you pick with.", "sources": [0] },
+    { "kind": "trivia", "text": "Combos weren't planned. Lenient timing let special moves cancel normal hits, and designer Akira Nishitani kept it as a feature.", "sources": [1] },
+    { "kind": "trivia", "text": "In Japan the boxer is M. Bison, a nod to Mike Tyson. Abroad, three boss names were shuffled, reportedly to avoid a lawsuit.", "sources": [2] },
+    { "kind": "people", "text": "Designed by Akira Nishitani and Akira \"Akiman\" Yasuda, produced by Yoshiki Okamoto.", "sources": [0] },
+    { "kind": "trivia", "text": "About 140,000 cabinets sold in Japan alone, numbers a Capcom developer called \"unheard of\".", "sources": [0] },
+    { "kind": "combo", "text": "Fireball (Ryu, Ken): roll down to forward, then punch. Directions flip when you switch sides.", "sources": [3] },
+    { "kind": "combo", "text": "Classic Ryu or Ken combo: jumping heavy kick, crouching medium kick, then fireball.", "sources": [3] },
+    { "kind": "tip", "text": "Hold away from your opponent to block, and down-away to block low attacks.", "sources": [3] }
+  ],
+  "sources": [
+    { "title": "Wikipedia: Street Fighter II: Champion Edition", "url": "https://en.wikipedia.org/wiki/Street_Fighter_II:_Champion_Edition" },
+    { "title": "Game Developer: Street Fighter II designer opens up about the cancelling bug", "url": "https://www.gamedeveloper.com/business/-i-street-fighter-ii-i-designer-opens-up-about-the-cancelling-bug-" },
+    { "title": "Den of Geek: Mike Tyson learns that Street Fighter 2's Balrog was based on him", "url": "https://www.denofgeek.com/games/mike-tyson-street-fighter-2-balrog" },
+    { "title": "PStroffolino's guide", "url": "https://gamefaqs.gamespot.com/arcade/583628-street-fighter-ii-champion-edition/faqs/844" }
+  ]
+}

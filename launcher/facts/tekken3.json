@@ -1,0 +1,18 @@
+{
+  "developer": "Namco",
+  "facts": [
+    { "kind": "origin", "text": "Hit arcades in March 1997, the first game on Namco's System 12 board, a step up from Tekken 2's System 11.", "sources": [0] },
+    { "kind": "trivia", "text": "Set 19 years after Tekken 2. Most of the cast is new, led by Jin Kazama, son of Kazuya and Jun.", "sources": [0] },
+    { "kind": "trivia", "text": "It introduced the sidestep: tap up or down to step into or out of the screen. Tekken became truly 3D here.", "sources": [0] },
+    { "kind": "tip", "text": "Jumps are lower than in Tekken 2, so you can't hop over every low attack. Sidestep instead.", "sources": [0] },
+    { "kind": "people", "text": "Katsuhiro Harada, later the face of Tekken, co-directed. Every fighter's moves were motion-captured.", "sources": [0] },
+    { "kind": "trivia", "text": "Its slower, big-beat soundtrack was new for Tekken. Harada was sceptical until composer Nobuyoshi Sano won him over.", "sources": [0] },
+    { "kind": "trivia", "text": "About 35,000 cabinets sold in 1997, and it was Japan's top-grossing arcade game of 1998.", "sources": [0] },
+    { "kind": "tip", "text": "1 and 2 are left and right punch, 3 and 4 the kicks. Learn one fast jab, one mid attack and one punish first.", "sources": [1] },
+    { "kind": "secret", "text": "Gon the dinosaur, Dr. Bosconovitch and Tekken Ball are PlayStation-only. This is the pure arcade original.", "sources": [0] }
+  ],
+  "sources": [
+    { "title": "Wikipedia: Tekken 3", "url": "https://en.wikipedia.org/wiki/Tekken_3" },
+    { "title": "Kittylord's move list", "url": "https://gamefaqs.gamespot.com/arcade/563192-tekken-3/faqs/980" }
+  ]
+}

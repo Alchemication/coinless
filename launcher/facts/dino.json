@@ -1,0 +1,20 @@
+{
+  "developer": "Capcom",
+  "facts": [
+    { "kind": "origin", "text": "Based on Mark Schultz's comic Xenozoic Tales. Capcom released it in April 1993, the year the Cadillacs and Dinosaurs cartoon aired.", "sources": [0] },
+    { "kind": "trivia", "text": "It's the 26th century. Dinosaurs are back, and poachers called the Black Marketeers are hunting them.", "sources": [0] },
+    { "kind": "people", "text": "Four heroes: Jack (balanced), Hannah (skill), Mustapha (speed) and Mess (power).", "sources": [0] },
+    { "kind": "trivia", "text": "In much of Asia it's simply known as \"Mustapha's game\", after its most popular hero.", "sources": [0] },
+    { "kind": "trivia", "text": "It runs on CP System Dash, Capcom's board with QSound audio. That's why MAME needs qsound_hle.zip.", "sources": [0, 1] },
+    { "kind": "tip", "text": "Dinosaurs attack everyone, heroes and gangs alike. Lure them into the crowd.", "sources": [0] },
+    { "kind": "tip", "text": "Attack + Jump together hits all around you but costs a little health. Save it for when you're surrounded.", "sources": [0, 2] },
+    { "kind": "trivia", "text": "Lose, and a gangster aims at you: \"Eat lead, baby!\" You get 20 seconds to continue. Luckily, coins are free here.", "sources": [0] },
+    { "kind": "trivia", "text": "It has never appeared on a Capcom collection; licensing for the comic is the usual explanation.", "sources": [0, 3] }
+  ],
+  "sources": [
+    { "title": "Wikipedia: Cadillacs and Dinosaurs (video game)", "url": "https://en.wikipedia.org/wiki/Cadillacs_and_Dinosaurs_(video_game)" },
+    { "title": "MAME 0.289: mame dino -listxml" },
+    { "title": "ninjasrok's guide and walkthrough", "url": "https://gamefaqs.gamespot.com/arcade/575551-cadillacs-and-dinosaurs/faqs/45433" },
+    { "title": "SUPERJUMP: Cadillacs and Dinosaurs Turns 30", "url": "https://superjumpmagazine.com/cadillacs-and-dinosaurs-turns-30" }
+  ]
+}

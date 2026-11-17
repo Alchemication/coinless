@@ -5,6 +5,7 @@
 Remember digging through your pockets while the countdown ran out? Coinless is a personal, native Mac front end for [MAME](https://www.mamedev.org/), made for playing arcade games from the couch. Open **Coinless**, browse your games with a PS4 controller, keyboard, or trackpad, and press ✕ to play. Quit a game and you're back in the library, with your place saved.
 
 - **A carousel of round CRT screens.** Each game shows a real picture: where you left off when there's a save, otherwise a frame from its attract mode that MAME captures in the background.
+- **Stories behind the games.** Under the Play button, short researched facts turn over on their own: who made the game and why, trivia, tips and combos. No clicks needed.
 - **Resume or start over.** Supported games save automatically when you quit and resume next time. Press □ twice for a new game.
 - **Couch-first controls.** D-pad or stick (hold to scroll), ✕ to play, Options for settings. Settings can be changed from the controller too.
 - **The same setup from Terminal.** `./play dino` launches a game with the app's settings and shows the MAME command it runs.
@@ -33,6 +34,7 @@ Drag `Coinless.app` to the Dock for one-click access. It finds the project from 
 | Action | PS4 controller | Keyboard | Mouse / trackpad |
 | --- | --- | --- | --- |
 | Browse | D-pad or left stick (hold to keep moving) | ← → | Swipe or scroll; click a side game |
+| Next / previous fact (optional) | ↓ ↑ or R1 L1 | ↓ ↑ | Click the fact |
 | Play / Resume | ✕ | Return | Click the centre game |
 | New game (on a saved game) | □, twice | N, twice | Click **New game** twice |
 | Settings and help | Options (or ○) | ? or ⌘, | Sliders button, top right |
@@ -70,6 +72,12 @@ Each game's picture lives in `art/<game>/`:
 
 Captures run one at a time in the background and pause while you play. They use a temporary folder, so your settings, NVRAM, and saves are never touched. Set `previewAt` in `games.json` to capture a different moment. **Settings → Rebuild previews** or `./play --previews` regenerates them.
 
+### Game facts
+
+Each game's facts live in `launcher/facts/<id>.json`: 8–10 short lines on its origin, its makers, trivia, tips, combos and secrets, each with sources. One shows at a time under the Play button and turns over by itself; a thin bar shows how long until the next. The now-playing screen shows a tip, the marquee names the developer, and `./play` prints one fact per launch. `./play --facts <game>` lists them all with sources.
+
+Facts are researched with the `game-facts` agent skill (see `CLAUDE.md`) and are kept under 140 characters.
+
 ### TV setup
 
 Use screen mirroring for the simplest setup. With an extended desktop, Coinless and MAME both use the **main display**, so make the TV the main display in **System Settings → Displays** before opening Coinless.
@@ -85,6 +93,7 @@ Use screen mirroring for the simplest setup. With an extended desktop, Coinless 
 ./play sf2ce --style crt       # smooth, sharp, or crt
 ./play hvnsgate --fresh        # start over (auto.sta is kept as auto.sta.bak)
 ./play tekken3 --dry-run       # print the MAME command without running it
+./play --facts sf2             # every fact about a game, with sources
 ./play --check                 # check MAME, games.json, and installed games
 ```
 
@@ -127,18 +136,22 @@ BIOS and device ZIPs can sit next to the game ZIP or once in **`games/bios/`**, 
 │   │   ├── Input.swift       #   controller, keyboard, trackpad
 │   │   ├── Library.swift     #   project paths, catalog, MAME arguments
 │   │   ├── Previews.swift    #   headless MAME screenshots
+│   │   ├── Facts.swift       #   game facts: format, loading, checks
+│   │   ├── FactTicker.swift  #   the rotating fact under Play
 │   │   ├── LibraryView.swift #   carousel and main screen
 │   │   ├── Disc.swift        #   round CRT screen, marquee, backdrop
 │   │   ├── HelpView.swift    #   settings and help
 │   │   ├── CLI.swift         #   ./play commands
 │   │   └── Catalog.swift     #   game model and theme
+│   ├── facts/                # Researched facts per game (<id>.json)
 │   ├── Tools/Icon.swift      # App icon generator
 │   ├── games.json            # Game catalog
 │   ├── Info.plist
 │   └── build.sh              # Build, sign, and check
 ├── docs/games.md             # Per-game downloads, BIOS files, and controls
 ├── CLAUDE.md, AGENTS.md      # Working rules for AI agents (kept identical)
-├── .claude/skills/game-tips/ # Gameplay coaching skill (.agents/skills links here)
+├── .claude/skills/          # Agent skills: game-tips, game-facts (.agents/skills links here)
+├── LICENSE                   # MIT
 ├── Coinless.app/               # Generated
 ├── art/                      # Generated library pictures (cover.png is yours)
 ├── games/                    # Your ROM ZIPs; games/bios/ for shared BIOS files
@@ -148,6 +161,10 @@ BIOS and device ZIPs can sit next to the game ZIP or once in **`games/bios/`**, 
 `.gitignore` excludes the app, game files, pictures, saves, and local MAME data. **Back up `cfg/`, `nvram/`, and `sta/` separately**; a Git clone won't restore them.
 
 Other useful app flags: `Coinless --preview [game]` renders the library to `launcher/.build/preview.png`, and `Coinless --smoke-test` launches and quits a game headlessly in a sandbox.
+
+## Licence
+
+Coinless is MIT licensed (see [LICENSE](LICENSE)). It contains no MAME code: it runs your separately installed `mame`, which has its own [licence](https://docs.mamedev.org/license.html). Game ROMs, BIOS files and the games themselves belong to their owners and are not included. Facts are short summaries with links to their sources.
 
 ## References
 

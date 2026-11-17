@@ -30,7 +30,8 @@ extension ArcadeModel {
         switch direction {
         case .left: move(-1)
         case .right: move(1)
-        case .up, .down: break
+        case .up: stepFact(-1)
+        case .down: stepFact(1)
         }
     }
 
@@ -89,6 +90,8 @@ extension ArcadeModel {
             pad.buttonB.pressedChangedHandler = onPress { $0.back() }      // ○
             pad.buttonX.pressedChangedHandler = onPress { $0.newGame() }   // □
             pad.buttonY.pressedChangedHandler = onPress { $0.refresh() }   // △
+            pad.leftShoulder.pressedChangedHandler = onPress { $0.stepFact(-1) }  // L1
+            pad.rightShoulder.pressedChangedHandler = onPress { $0.stepFact(1) }  // R1
             pad.buttonMenu.pressedChangedHandler = onPress { model in      // Options
                 if model.notice != nil { model.notice = nil } else { model.help.toggle() }
             }
@@ -135,7 +138,6 @@ extension ArcadeModel {
         case KeyCode.left: handle(.left)
         case KeyCode.right: handle(.right)
         case KeyCode.up, KeyCode.down:
-            guard help else { return false }
             handle(event.keyCode == KeyCode.up ? .up : .down)
         case KeyCode.enter, KeyCode.keypadEnter:
             if !event.isARepeat { confirm() }

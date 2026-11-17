@@ -37,7 +37,7 @@ struct ArcadeView: View {
         .background(Theme.background)
         .overlay {
             if let game = model.running {
-                NowPlaying(game: game, image: model.artwork[game.id]).transition(.opacity)
+                NowPlaying(game: game, image: model.artwork[game.id], tip: model.playingTip).transition(.opacity)
             }
         }
         .sheet(isPresented: $model.help) { HelpView(model: model) }
@@ -98,10 +98,14 @@ struct ArcadeView: View {
                 if model.resumeAvailable { newGameButton(game) }
             }
             .padding(.top, compact ? 4 : 8)
-            Text(model.resumeAvailable ? "Quit normally and your place is saved again." : game.note)
-                .font(.system(size: 12))
-                .foregroundStyle(.white.opacity(0.4))
-                .lineLimit(1)
+            if model.currentFact != nil {
+                FactTicker(model: model, tint: game.tint).padding(.top, compact ? 4 : 10)
+            } else {
+                Text(model.resumeAvailable ? "Quit normally and your place is saved again." : game.note)
+                    .font(.system(size: 12))
+                    .foregroundStyle(.white.opacity(0.4))
+                    .lineLimit(1)
+            }
         }
         .multilineTextAlignment(.center)
         .frame(maxWidth: .infinity)
@@ -161,6 +165,7 @@ struct ArcadeView: View {
     private var footer: some View {
         HStack(spacing: 22) {
             Hint(keys: "← →", label: "Browse")
+            if model.currentFact != nil { Hint(keys: "↑ ↓ L1 R1", label: "Facts") }
             Hint(keys: "✕ ⏎", label: model.resumeAvailable ? "Resume" : "Play")
             if model.resumeAvailable { Hint(keys: "□ N", label: "New game") }
             Hint(keys: "△ R", label: "Refresh")
@@ -185,7 +190,7 @@ struct Carousel: View {
                 let distance = index - model.selection
                 if abs(distance) <= 3 {
                     Disc(game: game, image: model.artwork[game.id], selected: distance == 0, saved: model.hasResume(game),
-                         diameter: diameter, marquee: "\(game.genre) • \(game.year) • PRESS START • ")
+                         diameter: diameter, marquee: Self.marquee(game, developer: model.facts[game.id]?.developer))
                         .scaleEffect(Self.scale(distance))
                         .saturation(distance == 0 ? 1 : 0.55)
                         .opacity(Self.opacity(distance))
@@ -198,6 +203,10 @@ struct Carousel: View {
             }
         }
         .frame(maxWidth: .infinity)
+    }
+
+    static func marquee(_ game: Game, developer: String?) -> String {
+        [developer?.uppercased(), game.genre, game.year, "PRESS START"].compactMap { $0 }.joined(separator: " • ") + " • "
     }
 
     static func scale(_ distance: Int) -> CGFloat { [1, 0.56, 0.4, 0.3][min(abs(distance), 3)] }
@@ -228,6 +237,7 @@ struct PageDots: View {
 struct NowPlaying: View {
     let game: Game
     let image: NSImage?
+    let tip: GameFacts.Fact?
 
     var body: some View {
         ZStack {
@@ -242,6 +252,20 @@ struct NowPlaying: View {
                     .font(.system(size: 14))
                     .foregroundStyle(.white.opacity(0.55))
                     .frame(maxWidth: 440)
+                if let tip {
+                    VStack(spacing: 8) {
+                        Label(tip.kind.label, systemImage: tip.kind.symbol)
+                            .font(.system(size: 10, weight: .heavy, design: .monospaced))
+                            .tracking(1.5)
+                            .foregroundStyle(game.tint)
+                        Text(tip.text)
+                            .font(.system(size: 15, weight: .medium))
+                            .foregroundStyle(.white.opacity(0.78))
+                    }
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: 520)
+                    .padding(.top, 8)
+                }
             }
         }
     }

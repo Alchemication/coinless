@@ -1,0 +1,21 @@
+{
+  "developer": "Racdym / Atlus",
+  "facts": [
+    { "kind": "origin", "text": "Atlus's and developer Racdym's first 3D fighter. It reached Japanese arcades in December 1996 and never left Japan.", "sources": [0, 1] },
+    { "kind": "trivia", "text": "Its working title was Ultimate Domain, and it was first meant for Sega's Model 2 board.", "sources": [0] },
+    { "kind": "trivia", "text": "It runs on Sony's ZN-1, PlayStation-based arcade hardware. That's why MAME needs the Atlus ZN-1 BIOS, coh1001l.zip.", "sources": [1, 3] },
+    { "kind": "trivia", "text": "Angels versus demons, fought under low ceilings: the touches that set it apart from other 3D fighters of its day.", "sources": [1] },
+    { "kind": "people", "text": "Directed by Hideki Yayama and Takeshi Murata. Racdym later became Racjin.", "sources": [0] },
+    { "kind": "tip", "text": "Landing or taking hits fills your Sol or Lunar gauge. When it's full, press Block + Kick + Punch to power up.", "sources": [1, 2] },
+    { "kind": "combo", "text": "Powered up? Down, then Down + Block + Kick + Punch unleashes an all-out assault.", "sources": [2] },
+    { "kind": "tip", "text": "Each attack changes with how quickly you press its button. Block + Punch is a throw.", "sources": [1, 2] },
+    { "kind": "secret", "text": "The PlayStation port hides extra fighters, including Kurara from Atlus's own Power Instinct.", "sources": [4] }
+  ],
+  "sources": [
+    { "title": "Wikipedia: Heaven's Gate (video game)", "url": "https://en.wikipedia.org/wiki/Heaven's_Gate_(video_game)" },
+    { "title": "Giant Bomb: Yusha Heaven's Gate", "url": "https://www.giantbomb.com/yusha-heavens-gate/3030-31276/" },
+    { "title": "GalFord's move list and guide (PlayStation)", "url": "https://gamefaqs.gamespot.com/ps/572988-heavens-gate/faqs/11381" },
+    { "title": "MAME 0.289: mame hvnsgate -listxml" },
+    { "title": "PSX Datacenter: Heaven's Gate (NTSC-J)", "url": "https://psxdatacenter.com/games/J/H/SLPS-00667.html" }
+  ]
+}
