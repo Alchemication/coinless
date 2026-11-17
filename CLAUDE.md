@@ -80,6 +80,7 @@ try on the couch.
 |---|---|
 | `README.md` | For players: what Coinless is, setup (agent or by hand), controls, saves, `./play`, troubleshooting, licence. Keep it short. |
 | `launcher/facts/<id>.json` | Researched facts per game, shown in the library ticker and by `./play`. Written with `game-facts`. |
+| `docs/images/` | README's before/after images, rendered by `launcher/Tools/readme-images.sh` (never edit by hand). |
 | `docs/games.md` | The catalog: folders, BIOS/device files, save support, ROM checks, button layouts, game notes, adding a game by hand (catalog fields). |
 | `CLAUDE.md` / `AGENTS.md` | Working rules (this file). |
 | `.claude/skills/*/SKILL.md` | Procedures: `setup` (first install, rebuilds), `add-game` (a game end to end), `game-facts` (research into `launcher/facts/`), `game-tips` (coaching, `references/<game>.md` per game). |
@@ -108,6 +109,7 @@ launcher/
   facts/<id>.json        researched facts per game
   games.json             the catalog
   Tools/Icon.swift       app icon generator
+  Tools/readme-images.sh README images (ReadmeArt.swift draws the Terminal one)
   Info.plist, build.sh
 docs/games.md            catalog, files, controls
 .claude/skills/          agent skills (.agents/skills links here)
@@ -175,6 +177,8 @@ Before reporting done:
 - MAME arguments changed: `./play <game> --dry-run` for the affected modes.
 - UI changed: `./Coinless.app/Contents/MacOS/Coinless --preview [game]`,
   then look at `launcher/.build/preview.png`. It briefly opens a window.
+  A visible change to the library also re-renders the README images:
+  `zsh launcher/Tools/readme-images.sh`, then look at both.
 - After moves or renames, grep for stale paths and names.
 
 ## Adding a game

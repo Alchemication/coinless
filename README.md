@@ -2,13 +2,25 @@
 
 *No more CONTINUE? 9… 8… 7…*
 
-Remember digging through your pockets while the countdown ran out? Coinless is a native Mac front end for [MAME](https://www.mamedev.org/), made for playing arcade games from the couch with a PS4 controller, keyboard or trackpad. Quit a game and you're back in the library, with your place saved.
+Remember digging through your pockets while the countdown ran out? Coinless is a native Mac front end for [MAME](https://www.mamedev.org/), made for playing arcade games from the couch.
 
-- **Round CRT screens** showing where you left off, or a frame from the game's attract mode.
-- **Stories behind the games:** short, sourced facts, tips and combos turn over under the Play button. No clicks needed.
-- **Resume or start over:** supported games save when you quit and resume next time.
-- **Couch-first:** everything works from the controller, settings included.
-- **Terminal too:** `./play dino` launches with the same settings and shows the MAME command.
+### Before: MAME from Terminal
+
+![Playing MAME from Terminal: environment variables and a long command per game, a missing-BIOS error, and keys to memorise](docs/images/before.png)
+
+Two variables and a long command per game, a dozen keys to remember, save slots to keep track of, and cryptic errors when a BIOS file is in the wrong folder.
+
+### After: Coinless
+
+![The Coinless library: round CRT screens in a carousel, with Cadillacs & Dinosaurs selected, a saved game, Resume and New game buttons, and a fact about the game](docs/images/after.png)
+
+- **Your place, waiting.** A saved game shows the exact moment you left it. Press ✕ to resume; quit normally and it's saved again. No slots to remember.
+- **Real pictures, made by MAME.** Every round CRT screen shows the game itself, captured from its attract mode in the background.
+- **Stories behind the games.** Under the Play button, short, sourced facts turn over on their own: who made it and why, trivia, tips and combos. The marquee names the developer.
+- **Made for the couch.** Everything works from a PS4 controller, settings included. Big type that reads from across the room.
+- **Nothing to set up per game.** BIOS files are found automatically, and a missing one is named in plain words before MAME even starts.
+- **Hard to lose progress.** Starting over takes two presses and keeps a backup; quitting the app mid-game still saves.
+- **Terminal too.** `./play dino` uses the same settings and saves, and shows the MAME command it runs.
 
 Coinless ships no games. You add the ones you want, using game files you have the right to use.
 
@@ -80,6 +92,6 @@ Back up `cfg/`, `nvram/` and `sta/` yourself; Git doesn't hold them.
 
 ## Licence
 
-MIT (see [LICENSE](LICENSE)). Coinless contains no MAME code: it runs your separately installed `mame`, which has its own [licence](https://docs.mamedev.org/license.html). It includes no ROMs, BIOS files or game content; obtaining them, and the right to use them, is up to you. Facts are short summaries that link to their sources.
+MIT (see [LICENSE](LICENSE)). Coinless contains no MAME code: it runs your separately installed `mame`, which has its own [licence](https://docs.mamedev.org/license.html). It includes no ROMs, BIOS files or games; obtaining them, and the right to use them, is up to you. The screenshots above show game artwork for illustration. Facts are short summaries that link to their sources.
 
 Working on Coinless itself? [CLAUDE.md](CLAUDE.md) has the layout, rules and checks.

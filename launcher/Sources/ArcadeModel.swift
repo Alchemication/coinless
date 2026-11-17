@@ -128,7 +128,10 @@ import GameController
         for game in games {
             guard let gameFacts = try? library.loadFacts(game) else { continue }
             loaded[game.id] = gameFacts
-            if factPosition[game.id] == nil { factPosition[game.id] = Int.random(in: 0..<gameFacts.facts.count) }
+            if factPosition[game.id] == nil {
+                // --preview renders the first fact, so README images are reproducible.
+                factPosition[game.id] = Self.isPreview ? 0 : Int.random(in: 0..<gameFacts.facts.count)
+            }
         }
         facts = loaded
         restartFacts()
