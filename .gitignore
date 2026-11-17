@@ -1,0 +1,29 @@
+# macOS metadata
+.DS_Store
+._*
+
+# Generated launcher app, binaries, caches, previews, and logs
+/Arcade.app/
+/launcher/.build/
+
+# Downloaded game ROMs, BIOS files, and other game assets
+/games/
+
+# Local MAME controls, machine data, and save states
+/cfg/
+/nvram/
+/sta/
+/memcard/
+/diff/
+
+# MAME screenshots, recordings, high scores, and runtime output
+/snap/
+/inp/
+/hi/
+/scores/
+/error.log
+
+# Local MAME preferences
+/mame.ini
+/ui.ini
+/plugin.ini
