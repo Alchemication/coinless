@@ -137,7 +137,8 @@ BIOS and device ZIPs can sit next to the game ZIP or once in **`games/bios/`**, 
 │   ├── Info.plist
 │   └── build.sh              # Build, sign, and check
 ├── docs/games.md             # Per-game downloads, BIOS files, and controls
-├── .agents/skills/game-tips/ # Gameplay coaching skill for AI agents
+├── CLAUDE.md, AGENTS.md      # Working rules for AI agents (kept identical)
+├── .claude/skills/game-tips/ # Gameplay coaching skill (.agents/skills links here)
 ├── Coinless.app/               # Generated
 ├── art/                      # Generated library pictures (cover.png is yours)
 ├── games/                    # Your ROM ZIPs; games/bios/ for shared BIOS files

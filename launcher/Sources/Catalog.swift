@@ -40,6 +40,8 @@ enum Theme {
     static let bezel = Color(hex: "07080A")
     static let accent = Color(hex: "B8EA78")
     static let ink = Color(hex: "111510")
+    /// Asks for a second press before something can't be taken back (New game).
+    static let caution = Color(hex: "FFB35C")
 }
 
 struct ArcadeError: LocalizedError {

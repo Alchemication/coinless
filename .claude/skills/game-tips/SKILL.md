@@ -1,6 +1,6 @@
 ---
 name: game-tips
-description: Give practical game tips, combos, boss tactics, and practice drills using per-game references.
+description: Practical tips, combos, special moves, boss tactics, and practice drills for the arcade games in this Coinless collection (Heaven's Gate, Cadillacs and Dinosaurs, Tekken 3, Street Fighter II, Final Fight, Golden Axe, and others), using per-game references. Use when the user asks how to play, beat, or get better at one of these games.
 ---
 
 # Game Tips

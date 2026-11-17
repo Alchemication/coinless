@@ -138,7 +138,7 @@ struct ArcadeView: View {
             .padding(.trailing, 12)
             .padding(.vertical, 12)
             .foregroundStyle(confirming ? Theme.ink : .white)
-            .background(confirming ? Color(hex: "FFB35C") : .white.opacity(0.08), in: Capsule())
+            .background(confirming ? Theme.caution : .white.opacity(0.08), in: Capsule())
             .overlay(Capsule().strokeBorder(.white.opacity(confirming ? 0 : 0.18)))
         }
         .buttonStyle(PressableStyle())
