@@ -1,11 +1,12 @@
 // Faint ghosts of arcade heroes, villains, ships and treats beside the top of
-// the page: real sprites from 36 classic arcade games (images/ghosts/), shown as
+// the page: real sprites and portraits from 38 classic arcade games (images/ghosts/), shown as
 // a tribute (credited in the footer). A game is dealt first, so every game gets
 // its turn however many sprites it has, then one of its sprites. One fades in
 // at a time, alternating sides, at a random spot, tilt and size in the empty
 // space beside the title, lingers, and fades away. Only on wide screens, never
 // for visitors who prefer less motion, and paused while the tab is hidden.
-// ?ghosts=all shows every sprite; ?ghosts=still holds four at their peak.
+// ?ghosts=all shows every sprite; ?ghosts=still holds four at their peak;
+// ?ghosts=portraits holds four portraits.
 ;(() => {
   // [game, kind, sprites]. Kinds: 'figure' (a character), 'icon' (a little 80s sprite,
   // drawn smaller), 'portrait' (a 3D-era select-screen face, shown as a round, feathered disc).
@@ -45,6 +46,8 @@
     ["Ghosts 'n Goblins", 'figure', ['ghosts-n-goblins-arthur', 'ghosts-n-goblins-princess', 'ghosts-n-goblins-red-arremer']],
     ["Gradius", 'icon', ['gradius-moai', 'gradius-vic-viper']],
     ["Rygar", 'figure', ['rygar', 'rygar-power-up']],
+    ["Heaven's Gate", 'portrait', ['heavens-gate-jin', 'heavens-gate-kyosuke', 'heavens-gate-verny', 'heavens-gate-sasa', 'heavens-gate-a-hau', 'heavens-gate-engetsu', 'heavens-gate-dulffer', 'heavens-gate-nanase']],
+    ["Tekken 3", 'portrait', ['tekken3-xiaoyu', 'tekken3-yoshimitsu', 'tekken3-nina', 'tekken3-law', 'tekken3-hwoarang', 'tekken3-eddy', 'tekken3-paul', 'tekken3-king']],
     ["Virtua Fighter 2", 'portrait', ['vf2-shun-di', 'vf2-akira-yuki', 'vf2-pai-chan', 'vf2-kage-maru', 'vf2-wolf-hawkfield', 'vf2-dural']],
   ]
 
@@ -63,7 +66,7 @@
     GAMES.forEach(([, , sprites]) => sprites.forEach((name) => stage.append(image(name))))
     return
   }
-  const still = mode === 'still'
+  const still = mode === 'still' || mode === 'portraits'
   if (!still && matchMedia('(prefers-reduced-motion: reduce)').matches) return
 
   const wide = matchMedia('(min-width: 1080px)')
@@ -74,7 +77,7 @@
 
   // Every game once, in a fresh order, before any comes round again.
   const next = () => {
-    if (!deck.length) deck = shuffle(GAMES)
+    if (!deck.length) deck = shuffle(mode === 'portraits' ? GAMES.filter(([, kind]) => kind === 'portrait') : GAMES)
     const [, kind, sprites] = deck.pop()
     return { kind, name: sprites[Math.floor(Math.random() * sprites.length)] }
   }
