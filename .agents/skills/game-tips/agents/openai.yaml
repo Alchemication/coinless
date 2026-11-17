@@ -1,0 +1,4 @@
+interface:
+  display_name: "Game Tips"
+  short_description: "Practical arcade coaching and per-game references"
+  default_prompt: "Use $game-tips to help me learn a character, practise combos, or get past a difficult stage."
