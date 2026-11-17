@@ -1,10 +1,10 @@
 import SwiftUI
 
 // Renders two README images. Run through launcher/Tools/readme-images.sh.
-//   then.png    the arcade: one cabinet, one game, empty pockets (original pixel art)
-//   before.png  playing MAME from Terminal. The commands and the error are real
+//   arcade.png  the arcade: one cabinet, one game, empty pockets (original pixel art)
+//   terminal.png  playing MAME from Terminal. The commands and the error are real
 //               (the error is MAME 0.289 without qsound_hle.zip).
-// Usage: readme-art <then.png> <before.png>
+// Usage: readme-art <arcade.png> <terminal.png>
 
 enum Tone { case prompt, command, error, comment, cursor }
 

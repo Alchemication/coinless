@@ -1,0 +1,17 @@
+{
+  "developer": "Capcom",
+  "facts": [
+    { "kind": "origin", "text": "It began as Street Fighter '89. Operators said it was nothing like Street Fighter, so it was renamed before release.", "sources": [0] },
+    { "kind": "people", "text": "Designed by Akira Nishitani and Akira Yasuda, produced by Yoshiki Okamoto: the team behind Street Fighter II two years later.", "sources": [0] },
+    { "kind": "trivia", "text": "Mayor Mike Haggar, a former pro wrestler, takes on the Mad Gear gang after they kidnap his daughter Jessica.", "sources": [0] },
+    { "kind": "trivia", "text": "Many enemies are named after 1980s rock musicians: Axl, Slash, Sid, Billy, Roxy and Poison.", "sources": [0] },
+    { "kind": "trivia", "text": "The gang is named after Capcom's 1987 racing game Mad Gear. Hugo Andore is based on André the Giant.", "sources": [0] },
+    { "kind": "trivia", "text": "Japan's highest-grossing arcade game of 1990, and Gamest's Best Game of the year.", "sources": [0] },
+    { "kind": "tip", "text": "Attack + Jump spins to clear everyone around you, but it costs a little health. Use it when you're surrounded.", "sources": [0] },
+    { "kind": "tip", "text": "Smash barrels and drums for food and weapons. Cody can stab again and again with a knife; Haggar's piledriver hits hardest.", "sources": [0] },
+    { "kind": "secret", "text": "The SNES port dropped Guy, co-op and a whole stage. Here you get all three heroes and two players.", "sources": [0] }
+  ],
+  "sources": [
+    { "title": "Wikipedia: Final Fight (video game)", "url": "https://en.wikipedia.org/wiki/Final_Fight_(video_game)" }
+  ]
+}

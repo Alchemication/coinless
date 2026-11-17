@@ -4,21 +4,21 @@
 
 Coinless is a native Mac front end for [MAME](https://www.mamedev.org/), made for playing arcade games from the couch. It keeps everything we loved about the arcade (the glowing cabinets, the attract screens, the marquees, the stories) and loses only the coin slot.
 
-### Then: the arcade
+### Insert coin
 
-![Pixel art: a child in a striped T-shirt stands at a glowing arcade cabinet with both pockets turned out, while the screen counts down CONTINUE? 9 and a last coin rolls away under the next machine](docs/images/then.png)
+![Pixel art: a child in a striped T-shirt stands at a glowing arcade cabinet with both pockets turned out, while the screen counts down CONTINUE? 9 and a last coin rolls away under the next machine](docs/images/arcade.png)
 
-One cabinet, one game, and a countdown racing through your pockets. We loved every second of it.
+The arcade: one cabinet, one game, and a countdown racing through your pockets. We loved every second of it.
 
-### Before: MAME from Terminal
+### Type a command
 
-![Playing MAME from Terminal: environment variables and a long command per game, a missing-BIOS error, and keys to memorise](docs/images/before.png)
+![Playing MAME from Terminal: environment variables and a long command per game, a missing-BIOS error, and keys to memorise](docs/images/terminal.png)
 
-Two variables and a long command per game, a dozen keys to remember, save slots to keep track of, and cryptic errors when a BIOS file is in the wrong folder.
+MAME at home, from Terminal: two variables and a long command per game, a dozen keys to remember, save slots to keep track of, and cryptic errors when a BIOS file is in the wrong folder.
 
-### After: Coinless
+### Press start
 
-![The Coinless library: round CRT screens in a carousel, with Cadillacs & Dinosaurs selected, a saved game, Resume and New game buttons, and a fact about the game](docs/images/after.png)
+![The Coinless library: round CRT screens in a carousel, with Cadillacs & Dinosaurs selected, a saved game, Resume and New game buttons, and a fact about the game](docs/images/coinless.png)
 
 - **Your place, waiting.** A saved game shows the exact moment you left it. Press ✕ to resume; quit normally and it's saved again. No slots to remember.
 - **Real pictures, made by MAME.** Every round CRT screen shows the game itself, captured from its attract mode in the background.
