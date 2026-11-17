@@ -1,0 +1,130 @@
+/* Coinless's public site: one column, read top to bottom, like a story.
+ * The one place its colours and lettering are defined; index.html adds none.
+ * Palette from the app's Theme (launcher/Sources/Catalog.swift). Fonts are the
+ * visitor's own system faces, so nothing loads from another site.
+ */
+
+:root {
+  --bg: #0c0e12;
+  --bezel: #07080a;
+  --accent: #b8ea78;
+  --neon: #ff7ad9;
+  --amber: #ffb35c;
+  --text: #ecefe8;
+  --soft: rgba(236, 239, 232, 0.7);
+  --faint: rgba(236, 239, 232, 0.42);
+  --line: rgba(255, 255, 255, 0.08);
+
+  --display: ui-rounded, "SF Pro Rounded", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --body: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  --column: 640px;
+  --wide: 980px;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: radial-gradient(900px 520px at 50% -120px, rgba(184, 234, 120, 0.1), transparent 70%), var(--bg);
+  color: var(--text);
+  font: 19px/1.7 var(--body);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* A CRT's scanlines over the page, barely there. */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0.13) 0 1px, transparent 1px 4px);
+}
+
+a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+em { font-style: normal; color: var(--text); font-weight: 650; }
+
+/* Everything sits in one column; pictures step out a little wider. */
+.top, .chapter, footer { width: min(var(--column), 100% - 40px); margin-inline: auto; }
+
+/* The top */
+.top { text-align: center; padding: 72px 0 40px; }
+.disc { position: relative; width: 200px; height: 200px; margin: 0 auto 26px; }
+.ring { position: absolute; inset: 0; animation: spin 80s linear infinite; }
+.ring text { font: 700 13px var(--mono); letter-spacing: 0.2em; fill: var(--faint); }
+.mark { position: absolute; inset: 31%; filter: drop-shadow(0 0 16px rgba(184, 234, 120, 0.55)); }
+.mark .slot { fill: var(--text); }
+.mark .cross, .mark .round { fill: none; stroke: var(--accent); stroke-width: 2.4; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.wordmark { margin: 0 0 18px; font: 800 13px/1 var(--mono); letter-spacing: 0.5em; color: var(--accent); }
+h1, h2 { font-family: var(--display); font-weight: 800; letter-spacing: -0.025em; margin: 0; }
+h1 { font-size: clamp(38px, 7vw, 64px); line-height: 1.05; }
+h1, h2, .lede { text-wrap: balance; }
+p, li { text-wrap: pretty; }
+.countdown {
+  margin: 20px 0 0;
+  font: 700 20px/1 var(--mono);
+  letter-spacing: 0.12em;
+  color: var(--amber);
+  text-shadow: 0 0 14px rgba(255, 159, 67, 0.6);
+}
+.countdown.free { color: var(--accent); text-shadow: 0 0 14px rgba(184, 234, 120, 0.6); }
+.lede { margin: 26px auto 0; max-width: 32em; color: var(--soft); }
+.links { margin: 26px 0 0; font: 700 13px/1 var(--mono); letter-spacing: 0.16em; text-transform: uppercase; }
+.links a { text-decoration: none; }
+.links span { margin: 0 14px; color: var(--faint); }
+
+/* Chapters */
+.chapter { padding: 64px 0 8px; }
+.chapter + .chapter { border-top: 1px solid var(--line); margin-top: 48px; }
+.label { margin: 0 0 14px; font: 700 12px/1 var(--mono); letter-spacing: 0.24em; text-transform: uppercase; color: var(--faint); }
+.label.insert { color: var(--neon); }
+.label.start { color: var(--accent); }
+h2 { font-size: clamp(30px, 4.6vw, 42px); line-height: 1.1; margin-bottom: 22px; }
+p { margin: 0 0 18px; }
+.chapter > p { color: var(--soft); }
+
+figure { margin: 36px calc((min(var(--wide), 100vw - 40px) - 100%) / -2) 0; }
+figure img { display: block; width: 100%; height: auto; border-radius: 14px; border: 1px solid var(--line); box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55); }
+figure.glow img { box-shadow: 0 24px 80px rgba(184, 234, 120, 0.16), 0 0 0 1px rgba(184, 234, 120, 0.18); }
+
+/* What it does: a quiet list, a coin for each line. */
+.perks { list-style: none; margin: 40px 0 0; padding: 0; }
+.perks li { position: relative; padding: 14px 0 14px 34px; border-top: 1px solid var(--line); color: var(--soft); font-size: 17.5px; }
+.perks li::before { content: ""; position: absolute; left: 4px; top: 22px; width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--accent); }
+.perks b { color: var(--text); font-weight: 650; }
+code { font: 0.88em var(--mono); color: var(--text); background: rgba(255, 255, 255, 0.07); padding: 2px 6px; border-radius: 6px; }
+
+/* Setup: one terminal screen. */
+.screen {
+  margin: 30px 0 26px;
+  padding: 22px 24px;
+  border-radius: 14px;
+  background: var(--bezel);
+  border: 1px solid var(--line);
+  font: 14.5px/1.65 var(--mono);
+  color: var(--text);
+  overflow-x: auto;
+}
+.screen .dim { color: var(--faint); }
+.screen .you { color: var(--accent); font-weight: 700; }
+.fine { font-size: 15.5px; color: var(--faint) !important; }
+
+footer { margin-top: 80px; padding: 36px 0 70px; border-top: 1px solid var(--line); color: var(--faint); font-size: 14.5px; text-align: center; }
+footer p { margin: 0 0 8px; }
+footer .sign { font-family: var(--display); font-size: 18px; color: var(--soft); }
+
+@media (max-width: 600px) {
+  body { font-size: 17.5px; }
+  .top, .chapter, footer { width: calc(100% - 32px); }
+  figure { margin-inline: 0; }
+  .top { padding-top: 48px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .ring { animation: none; }
+}

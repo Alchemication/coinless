@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Coinless</title>
+<meta name="description" content="A love letter to the arcade, for the Mac: a couch-friendly front end for MAME that keeps everything we loved and loses only the coin slot.">
+<meta name="theme-color" content="#0c0e12">
+<meta property="og:title" content="Coinless: no more CONTINUE? 9… 8… 7…">
+<meta property="og:description" content="A love letter to the arcade, for the Mac. Everything we loved, minus the coin slot.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://alchemication.github.io/coinless/">
+<meta property="og:image" content="https://alchemication.github.io/coinless/images/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="images/icon-180.png">
+<link rel="apple-touch-icon" href="images/icon-180.png">
+<link rel="stylesheet" href="assets/site.css">
+<!-- One page, one column, the story: the arcade, MAME in Terminal, Coinless.
+     Colours and lettering live in assets/site.css. Images come from
+     launcher/Tools/readme-images.sh. site/check.py runs before publishing. -->
+</head>
+<body>
+
+<header class="top">
+  <div class="disc" aria-hidden="true">
+    <svg class="ring" viewBox="0 0 300 300">
+      <defs><path id="circle" d="M150,150 m-132,0 a132,132 0 1,1 264,0 a132,132 0 1,1 -264,0"/></defs>
+      <text><textPath href="#circle" textLength="826">INSERT COIN · PRESS START · FREE PLAY · NO MORE CONTINUE? · </textPath></text>
+    </svg>
+    <svg class="mark" viewBox="0 0 24 24">
+      <rect class="slot" x="10.2" y="6" width="3.6" height="12" rx="1.8"/>
+      <line class="cross" x1="5" y1="5" x2="19" y2="19"/>
+      <circle class="round" cx="12" cy="12" r="10.3"/>
+    </svg>
+  </div>
+  <p class="wordmark">COINLESS</p>
+  <h1>The arcade, minus the coin slot.</h1>
+  <p class="countdown" id="countdown" aria-hidden="true">CONTINUE? 9</p>
+  <p class="lede">A love letter to the arcade, for the Mac: play the games you grew up with from the couch, with a controller, and pick up right where you left off.</p>
+  <p class="links"><a href="#setup">Set it up</a><span>·</span><a href="https://github.com/Alchemication/coinless">GitHub</a></p>
+</header>
+
+<main>
+  <article class="chapter">
+    <p class="label insert">01 · Insert coin</p>
+    <h2>One cabinet. One summer. Every coin I had.</h2>
+    <p>As a teenager, my favourite game was <em>Heaven's Gate</em>. It was the only fighting-game cabinet in my town, Poraj in Poland, in a little arcade next to the swimming pool that opened only in the summer. All my money went into that slot.</p>
+    <p>Years later I wondered: could I still play it? And how much pain would it be to get it running?</p>
+    <figure><img src="images/arcade.png" width="1600" height="896" alt="Pixel art: a child in a striped T-shirt at a glowing arcade cabinet, pockets turned out, while the screen counts down CONTINUE? 9 and the last coin rolls away"></figure>
+  </article>
+
+  <article class="chapter">
+    <p class="label">02 · Type a command</p>
+    <h2>Easy to run. Hard to love.</h2>
+    <p>Getting it running turned out to be surprisingly easy: MAME, the game's files, one command. So I went exploring the other staples, the ones I never had the chance, or enough coins in my pocket, to play.</p>
+    <p>Playing them was another story. Two variables and a long command for every game, a dozen keys to remember, save slots to keep track of, and cryptic errors whenever a BIOS file sat in the wrong folder.</p>
+    <figure><img src="images/terminal.png" width="1600" height="805" loading="lazy" alt="A Terminal window: environment variables and a long MAME command per game, a missing-BIOS error, and a list of keys to remember"></figure>
+  </article>
+
+  <article class="chapter">
+    <p class="label start">03 · Press start</p>
+    <h2>So I built the arcade I wanted.</h2>
+    <p>A little bit of Codex and Claude Code came to the rescue, and now there's Coinless: a library you browse from the couch, where every game picks up right where you left it.</p>
+    <figure class="glow"><img src="images/coinless.png" width="1600" height="1025" loading="lazy" alt="The Coinless library: round CRT screens in a carousel, Cadillacs &amp; Dinosaurs selected with a saved game, Resume and New game buttons, and a fact about the game"></figure>
+    <ul class="perks">
+      <li><b>Your place, waiting.</b> A saved game shows the moment you left it. Press ✕ to resume; no slots to remember.</li>
+      <li><b>Real pictures.</b> Every round screen shows the game itself, captured by MAME from its attract mode.</li>
+      <li><b>Stories behind the games.</b> Short, sourced facts turn over under the Play button: who made it, why, tips and combos.</li>
+      <li><b>Made for the couch.</b> Everything works from a PS4 controller, in type that reads across the room.</li>
+      <li><b>Nothing to set up per game.</b> BIOS files are found automatically; a missing one is named in plain words.</li>
+      <li><b>Terminal too.</b> <code>./play dino</code> uses the same settings and saves, and shows the command it runs.</li>
+    </ul>
+  </article>
+
+  <article class="chapter">
+    <p class="label insert">04 · Continue?</p>
+    <h2>Maybe, one day: every console.</h2>
+    <p>Today Coinless speaks MAME. One day the same library could hold console games too, so Zelda sits next to Heaven's Gate, whatever the platform. No promises: it's a toy project, and the countdown is off.</p>
+  </article>
+
+  <article class="chapter" id="setup">
+    <p class="label start">Set it up</p>
+    <h2>In a conversation.</h2>
+    <p>Coinless is made to be set up by a coding agent. Clone it, open the folder in Claude Code, Codex or another agent, and ask.</p>
+    <pre class="screen"><span class="dim">$</span> git clone https://github.com/Alchemication/coinless.git
+<span class="dim">$</span> cd coinless
+
+<span class="you">&gt; Set up Coinless</span>
+<span class="dim">  checks MAME and Apple's tools, builds the app, opens it</span>
+
+<span class="you">&gt; Add Heaven's Gate</span>
+<span class="dim">  finds the MAME set, asks for its files, checks them,
+  adds its picture, facts and tips</span></pre>
+    <p class="fine">Prefer doing it by hand? The <a href="https://github.com/Alchemication/coinless#setup">README</a> has the commands. Needs macOS 14 or later, MAME from Homebrew, and Apple's command-line tools. Coinless ships no games: you add the ones you want, using files you have the right to use.</p>
+  </article>
+</main>
+
+<footer>
+  <p class="sign">Made by Adam, for the kid at the pool in Poraj.</p>
+  <p>MIT licence · Runs your own copy of <a href="https://www.mamedev.org/">MAME</a>, which has its own licence · No ROMs, BIOS files or games included · <a href="https://github.com/Alchemication/coinless">Source</a></p>
+</footer>
+
+<script>
+  // CONTINUE? 9… 8… down to 0, then the arcade's own words for no coins needed.
+  // Visitors who prefer less motion see the ending at once.
+  ;(() => {
+    const el = document.getElementById('countdown')
+    const free = () => { el.textContent = 'FREE PLAY'; el.classList.add('free') }
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return free()
+    let n = 9
+    const tick = setInterval(() => {
+      n -= 1
+      if (n < 0) { clearInterval(tick); free() } else { el.textContent = 'CONTINUE? ' + n }
+    }, 1000)
+  })()
+</script>
+</body>
+</html>
