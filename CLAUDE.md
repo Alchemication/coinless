@@ -13,8 +13,9 @@ playing (previews, smoke tests, experiments) gets a temporary folder for
 on a *copy* of a save. Check a save is byte-identical (`md5`) after anything
 near `sta/`.
 
-The project folder stays `emu` (Claude Code sessions are keyed by its path);
-the product is Coinless.
+Adam's checkout is a folder named `emu` (Claude Code sessions are keyed by
+its path), a fresh clone is `coinless`; the product is Coinless either way.
+Never hard-code either name: find the project from paths, as `Library` does.
 
 Work on `main`, and commit and push there directly: it's a personal toy
 project, so no branches or pull requests. Commit when asked, with the

@@ -32,7 +32,14 @@ Coinless ships no games. You add the ones you want, using game files you have th
 
 ## Setup
 
-**With a coding agent (easiest).** Open this folder in Claude Code, Codex or another coding agent and say:
+First, get the code:
+
+```sh
+git clone https://github.com/Alchemication/coinless.git
+cd coinless
+```
+
+**With a coding agent (easiest).** Open the `coinless` folder in Claude Code, Codex or another coding agent and say:
 
 > Set up Coinless
 
