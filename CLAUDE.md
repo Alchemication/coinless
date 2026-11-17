@@ -157,7 +157,10 @@ Never commit game files, saves or generated folders; `.gitignore` covers them.
 - **Catalog changes** keep `Library.validate` strict: a bad `games.json`
   fails with a message naming the entry.
 - **Licence:** MIT. Never vendor MAME code, ROMs, BIOS files, game art or
-  long copied text; link to sources instead.
+  long copied text; link to sources instead. One exception, Adam's call: the
+  site's hero ghosts (`site/images/ghosts/`) are real Street Fighter II and
+  Golden Axe stance sprites, shown as a tribute and credited in the footer.
+  Adding characters keeps that credit line true.
 - **No backward-compat shims:** when moving code, update all callers. One
   exception: `Preferences.migrateFromArcade` (settings from the old app name).
 

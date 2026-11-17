@@ -10,6 +10,7 @@
   --accent: #b8ea78;
   --neon: #ff7ad9;
   --amber: #ffb35c;
+  --violet: #afa0ff;
   --text: #ecefe8;
   --soft: rgba(236, 239, 232, 0.7);
   --faint: rgba(236, 239, 232, 0.42);
@@ -76,6 +77,26 @@ p, li { text-wrap: pretty; }
 .links { margin: 26px 0 0; font: 700 13px/1 var(--mono); letter-spacing: 0.16em; text-transform: uppercase; }
 .links a { text-decoration: none; }
 .links span { margin: 0 14px; color: var(--faint); }
+
+/* Faint ghosts of arcade heroes beside the title (assets/ghosts.js): the real
+   sprites, fading in and out like a CRT's afterglow. */
+.hero { position: relative; }
+.ghosts { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.ghost {
+  position: absolute;
+  opacity: 0;
+  transform: rotate(var(--turn)) scaleX(var(--flip));
+  animation: haunt 11s ease-in-out forwards;
+}
+.ghost img { display: block; height: 100%; width: auto; image-rendering: pixelated; }
+@keyframes haunt {
+  0% { opacity: 0; translate: 0 12px; }
+  30%, 62% { opacity: var(--peak); }
+  100% { opacity: 0; translate: 0 -12px; }
+}
+.ghost.still { animation: none; opacity: var(--peak); }
+.ghosts.sheet { position: relative; display: flex; flex-wrap: wrap; justify-content: center; gap: 36px; padding: 30px; background: var(--bg); z-index: 5; }
+.ghosts.sheet img { height: 150px; width: auto; image-rendering: pixelated; }
 
 /* Chapters */
 .chapter { padding: 64px 0 8px; }

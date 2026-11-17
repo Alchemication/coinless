@@ -35,8 +35,16 @@ def check(page: Path) -> list[str]:
     return problems
 
 
+def ghosts() -> list[str]:
+    """Every sprite assets/ghosts.js names exists in images/ghosts/."""
+    script = (SITE / "assets/ghosts.js").read_text(encoding="utf-8")
+    names = re.findall(r"'((?:sf2|goldenaxe)-[a-z-]+)'", script)
+    return [f"ghosts.js: images/ghosts/{name}.png doesn't exist" for name in names
+            if not (SITE / f"images/ghosts/{name}.png").exists()]
+
+
 def main() -> int:
-    problems = [problem for page in sorted(SITE.glob("*.html")) for problem in check(page)]
+    problems = [problem for page in sorted(SITE.glob("*.html")) for problem in check(page)] + ghosts()
     css = (SITE / "assets/site.css").read_text(encoding="utf-8")
     for target in re.findall(r'url\(["\']?([^"\')]+)', css):
         if re.match(r"(https?:)?//", target):
