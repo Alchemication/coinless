@@ -135,7 +135,8 @@ Never commit game files, saves or generated folders; `.gitignore` covers them.
   (state, launching, saves, previews), `Input` (pad, keyboard, trackpad),
   `Previews` (headless captures), `Facts` (facts format and checks),
   `MameInfo` (what MAME says a system needs, for `--inspect` and `--check`),
-  `Sounds` (synthesised interface cues and the background bed),
+  `Sounds` (synthesised cues; the music player: two decks that crossfade),
+  `Music` (seven weekday themes and how they're rendered),
   `LibraryView` / `Disc` / `FactTicker` / `HelpView` (UI),
   `App` (window, menus, lifecycle), `CLI` (`./play`), `Catalog` (`Game`,
   `Theme`). A new job gets a new file; `build.sh` picks it up.
@@ -147,9 +148,11 @@ Never commit game files, saves or generated folders; `.gitignore` covers them.
   Monospaced caps with tracking for labels, rounded heavy for titles. Size
   for a TV across the room. Animate state changes (`withAnimation`, springs
   for movement); no hard cuts.
-- **Sound:** every sound is synthesised in `Sounds.swift` (no audio files,
-  no game's sounds): cues are short and soft (peaks around -18 to -27
-  dBFS), the bed quieter still, and nothing plays while a game runs or the
+- **Sound:** every sound is synthesised (`Sounds.swift`, `Music.swift`; no
+  audio files, no game's sounds): cues are short and soft (peaks around -18
+  to -27 dBFS); each music theme is levelled to -23 dBFS, sparse (a bell
+  melody, at most two arpeggio notes a bar), loops without a seam, and the
+  app opens on the day's theme, and nothing plays while a game runs or the
   app is in the background. A new action gets a cue only if it helps; the
   fact ticker stays silent. Check levels before shipping a new sound.
 - **Errors the player sees** are a `Notice`: a title saying what happened and

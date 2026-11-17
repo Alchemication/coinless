@@ -1,8 +1,8 @@
 import AVFoundation
 
-/// Soft interface sounds and a quiet background bed, synthesised at launch: short
-/// triangle and filtered-square blips, and a slow retro lounge loop. All original
-/// (no game's sounds), quiet by design, and silent while a game runs.
+/// Soft interface sounds and the library's background music (Music.swift), all
+/// synthesised: short triangle and filtered-square blips, and seven slow themes.
+/// All original (no game's sounds), quiet by design, and silent while a game runs.
 enum Cue: String, CaseIterable, Sendable {
     case move, bump, start, open, close, warn, welcome, error
 
@@ -24,7 +24,7 @@ enum Cue: String, CaseIterable, Sendable {
 enum Synth {
     static let sampleRate = 44_100.0
 
-    enum Wave { case triangle, square }
+    enum Wave { case triangle, square, sine, bell }
 
     struct Note {
         var at: Double          // seconds from the cue's start
@@ -80,40 +80,6 @@ enum Synth {
         return out
     }
 
-    /// The background bed: eight slow bars at 80 BPM (about 24 seconds), a warm
-    /// detuned pad, a soft bass note per bar and a sparse filtered arpeggio, then
-    /// warmed by a low-pass. Its tail is folded onto its start, so it loops seamlessly.
-    static func bed() -> [Float] {
-        let beat = 0.75, bar = beat * 4
-        // Am7, Fmaj7, Cmaj7, Em7, Dm7, Fmaj7, Cadd9, G6
-        let chords = [[57, 60, 64, 67], [53, 57, 60, 64], [48, 52, 55, 59], [52, 55, 59, 62],
-                      [50, 53, 57, 60], [53, 57, 60, 64], [48, 55, 60, 62], [55, 59, 62, 64]]
-        var notes: [Note] = []
-        for (index, chord) in chords.enumerated() {
-            let start = Double(index) * bar
-            for midi in chord {
-                for detune in [0.997, 1.003] {
-                    notes.append(Note(at: start, from: hz(midi) * detune, to: hz(midi) * detune, length: bar + 0.8,
-                                      gain: 0.011, attack: 0.7, decay: 1.3))
-                }
-            }
-            notes.append(Note(at: start, from: hz(chord[0] - 12), to: hz(chord[0] - 12), length: bar * 0.95,
-                              gain: 0.045, attack: 0.02, decay: 2.6))
-            for (step, voice) in [0, 2, 1, 3].enumerated() where (index + step) % 2 == 0 || step == 0 {
-                let midi = chord[voice] + 12
-                notes.append(Note(at: start + Double(step) * beat, from: hz(midi), to: hz(midi), length: 0.5,
-                                  wave: .square, gain: 0.012, attack: 0.006, decay: 5.5))
-            }
-        }
-        let total = Int(Double(chords.count) * bar * sampleRate)
-        var out = render(notes, length: Double(chords.count) * bar + 1.2)
-        for i in total..<out.count { out[i - total] += out[i] }
-        out.removeLast(out.count - total)
-        var smooth: Float = 0
-        for i in out.indices { smooth += (out[i] - smooth) * 0.3; out[i] = smooth }
-        return out
-    }
-
     /// Mixes notes: each with its attack and exponential decay, squares softened by a one-pole low-pass.
     static func render(_ notes: [Note], length: Double) -> [Float] {
         var out = [Float](repeating: 0, count: Int(length * sampleRate))
@@ -126,7 +92,14 @@ enum Synth {
                 let frequency = note.from + (note.to - note.from) * progress
                 phase += frequency / sampleRate
                 let cycle = phase - phase.rounded(.down)
-                var value = note.wave == .triangle ? 4 * abs(cycle - 0.5) - 1 : (cycle < 0.5 ? 1 : -1)
+                var value: Double
+                switch note.wave {
+                case .triangle: value = 4 * abs(cycle - 0.5) - 1
+                case .square: value = cycle < 0.5 ? 1 : -1
+                case .sine: value = sin(2 * .pi * cycle)
+                // A bell: the fundamental plus a soft overtone that fades faster.
+                case .bell: value = sin(2 * .pi * cycle) + 0.3 * sin(4 * .pi * cycle) * exp(-6 * progress)
+                }
                 if note.wave == .square { smooth += (value - smooth) * 0.22; value = smooth }
                 let attack = min(1, t / note.attack)
                 let decay = exp(-note.decay * progress)
@@ -138,19 +111,36 @@ enum Synth {
 }
 
 /// Plays cues through a small pool of player nodes, so quick moves can overlap,
-/// and the bed on its own node, faded in and out.
+/// and the music on two decks behind one bus: the bus fades it in and out; the
+/// decks crossfade from one theme to the next.
 @MainActor final class Sounds {
     var enabled: Bool
+    /// Told whenever a different theme starts.
+    var onTheme: ((MusicTheme) -> Void)?
+    private(set) var theme = Music.todayIndex()
+
     private let engine = AVAudioEngine()
     private var players: [AVAudioPlayerNode] = []
     private var buffers: [Cue: AVAudioPCMBuffer] = [:]
     private var next = 0
     private let format = AVAudioFormat(standardFormatWithSampleRate: Synth.sampleRate, channels: 1)!
-    private let bedPlayer = AVAudioPlayerNode()
-    private var bedBuffer: AVAudioPCMBuffer?
-    private var bedWanted = false
-    private var bedScheduled = false
-    private var fade: Task<Void, Never>?
+
+    private let bus = AVAudioMixerNode()
+    private let decks = [AVAudioPlayerNode(), AVAudioPlayerNode()]
+    private var live = 0
+    private var deckTheme: [Int?] = [nil, nil]
+    private var rendered: [Int: AVAudioPCMBuffer] = [:]
+    private var rendering: Set<Int> = []
+    private var pendingSwitch: (theme: Int, seconds: Double)?
+    private var audible = false
+    private var elapsed = 0.0
+    private var crossfading = false
+    private var busFade: Task<Void, Never>?
+    private var ticker: Task<Void, Never>?
+
+    /// Each theme plays this many times before drifting into the next.
+    static let loopsPerTheme = 2.0
+    static let crossfadeSeconds = 8.0
 
     init(enabled: Bool) {
         self.enabled = enabled
@@ -161,18 +151,16 @@ enum Synth {
             engine.connect(player, to: engine.mainMixerNode, format: format)
             players.append(player)
         }
-        engine.attach(bedPlayer)
-        engine.connect(bedPlayer, to: engine.mainMixerNode, format: format)
-        bedPlayer.volume = 0
+        engine.attach(bus)
+        engine.connect(bus, to: engine.mainMixerNode, format: format)
+        for deck in decks {
+            engine.attach(deck)
+            engine.connect(deck, to: bus, format: format)
+        }
+        bus.outputVolume = 0
         engine.mainMixerNode.outputVolume = 0.9
         engine.prepare()
-        // The bed takes a moment to synthesise; do it off the main thread.
-        Task { [weak self] in
-            let samples = await Task.detached(priority: .utility) { Synth.bed() }.value
-            guard let self else { return }
-            self.bedBuffer = self.buffer(samples)
-            if self.bedWanted { self.bed(playing: true) }
-        }
+        prepare(theme)
     }
 
     private func buffer(_ samples: [Float]) -> AVAudioPCMBuffer? {
@@ -187,28 +175,112 @@ enum Synth {
         return engine.isRunning
     }
 
-    /// Fades the bed in or out; it keeps its place in the loop while silent.
-    func bed(playing: Bool) {
-        bedWanted = playing
-        guard let bedBuffer, running() else { return }
-        if playing && !bedScheduled {
-            bedPlayer.scheduleBuffer(bedBuffer, at: nil, options: .loops)
-            bedScheduled = true
+    // MARK: Music
+
+    /// Synthesises a theme in the background (a fraction of a second), once.
+    private func prepare(_ index: Int) {
+        guard rendered[index] == nil, !rendering.contains(index) else { return }
+        rendering.insert(index)
+        let theme = Music.themes[index]
+        Task { [weak self] in
+            let samples = await Task.detached(priority: .utility) { Music.render(theme) }.value
+            guard let self else { return }
+            self.rendering.remove(index)
+            self.rendered[index] = self.buffer(samples)
+            if index == self.theme && self.audible { self.startLive() }
+            if let pending = self.pendingSwitch, pending.theme == index {
+                self.pendingSwitch = nil
+                self.crossfade(to: index, over: pending.seconds)
+            }
         }
-        if playing && !bedPlayer.isPlaying { bedPlayer.play() }
-        fade?.cancel()
-        let target: Float = playing ? 1 : 0
-        let steps = playing ? 40 : 16
-        let from = bedPlayer.volume
-        fade = Task { [weak self] in
+    }
+
+    /// Fades the music in or out; it keeps its place while silent.
+    func bed(playing: Bool) {
+        audible = playing
+        guard running() else { return }
+        if playing { startLive() } else { ticker?.cancel(); ticker = nil }
+        busFade?.cancel()
+        let from = bus.outputVolume, to: Float = playing ? 1 : 0
+        let steps = playing ? 50 : 16
+        busFade = Task { [weak self] in
             for step in 1...steps {
                 try? await Task.sleep(for: .milliseconds(30))
                 guard !Task.isCancelled, let self else { return }
-                self.bedPlayer.volume = from + (target - from) * Float(step) / Float(steps)
+                self.bus.outputVolume = from + (to - from) * Float(step) / Float(steps)
             }
-            if !playing { self?.bedPlayer.pause() }
+            if !playing { self?.decks.forEach { $0.pause() } }
         }
     }
+
+    /// Another theme, by a short crossfade (← → on the music setting).
+    func skip(_ step: Int) {
+        let count = Music.themes.count
+        crossfade(to: ((theme + step) % count + count) % count, over: 2.5)
+    }
+
+    private func startLive() {
+        guard let buffer = rendered[theme] else { prepare(theme); return }
+        let deck = decks[live]
+        if deckTheme[live] != theme {
+            deck.stop()
+            deck.volume = 1
+            deck.scheduleBuffer(buffer, at: nil, options: .loops)
+            deckTheme[live] = theme
+            onTheme?(Music.themes[theme])
+        }
+        if !deck.isPlaying { deck.play() }
+        if crossfading, !decks[1 - live].isPlaying, deckTheme[1 - live] != nil { decks[1 - live].play() }
+        guard ticker == nil else { return }
+        ticker = Task { [weak self] in
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .milliseconds(500))
+                guard let self, !Task.isCancelled else { return }
+                self.elapsed += 0.5
+                let due = Music.themes[self.theme].length * Self.loopsPerTheme
+                let following = (self.theme + 1) % Music.themes.count
+                if self.elapsed > due - 20 { self.prepare(following) }
+                if self.elapsed >= due && !self.crossfading { self.crossfade(to: following, over: Self.crossfadeSeconds) }
+            }
+        }
+    }
+
+    private func crossfade(to index: Int, over seconds: Double) {
+        guard index != theme || deckTheme[live] != index else { return }
+        guard let buffer = rendered[index] else { pendingSwitch = (index, seconds); prepare(index); return }
+        guard !crossfading else { return }
+        crossfading = true
+        let outgoing = live, incoming = 1 - live
+        let outDeck = decks[outgoing], inDeck = decks[incoming]
+        inDeck.stop()
+        inDeck.volume = 0
+        inDeck.scheduleBuffer(buffer, at: nil, options: .loops)
+        deckTheme[incoming] = index
+        if audible { inDeck.play() }
+        live = incoming
+        theme = index
+        elapsed = 0
+        onTheme?(Music.themes[index])
+        let steps = max(1, Int(seconds / 0.1))
+        let startVolume = outDeck.volume
+        Task { [weak self] in
+            for step in 1...steps {
+                try? await Task.sleep(for: .milliseconds(100))
+                let x = Float(step) / Float(steps)
+                inDeck.volume = x
+                outDeck.volume = startVolume * (1 - x)
+            }
+            guard let self else { return }
+            outDeck.stop()
+            self.deckTheme[outgoing] = nil
+            self.crossfading = false
+            // Keep only what's playing and what plays next.
+            let keep: Set<Int> = [self.theme, (self.theme + 1) % Music.themes.count]
+            self.rendered = self.rendered.filter { keep.contains($0.key) }
+        }
+    }
+
+    // MARK: Cues
 
     func play(_ cue: Cue) {
         guard enabled, let buffer = buffers[cue] else { return }

@@ -43,8 +43,17 @@ struct HelpView: View {
 
                 SettingRow(focused: model.helpFocus == .music) {
                     VStack(alignment: .leading, spacing: 6) {
-                        Toggle("Background music", isOn: $model.music)
-                        Text("A quiet retro loop on the library screen. It fades out while you play.")
+                        HStack {
+                            Toggle("Background music", isOn: $model.music)
+                            Spacer()
+                            if model.music {
+                                Button { model.sounds.skip(-1) } label: { Image(systemName: "backward.fill") }
+                                    .buttonStyle(.borderless).help("Previous theme")
+                                Button { model.sounds.skip(1) } label: { Image(systemName: "forward.fill") }
+                                    .buttonStyle(.borderless).help("Next theme")
+                            }
+                        }
+                        Text(model.music ? "Now playing: \(model.nowPlaying). ← → for another theme." : "Seven quiet themes, one for each day of the week.")
                             .font(.caption).foregroundStyle(.secondary)
                     }
                 }

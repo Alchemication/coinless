@@ -42,7 +42,10 @@ import GameController
     @Published var interfaceSounds = Preferences.interfaceSounds {
         didSet { Preferences.interfaceSounds = interfaceSounds; sounds.enabled = interfaceSounds && !Self.quiet }
     }
-    /// Soft interface cues and the background bed (Sounds.swift).
+    /// The music theme playing now, e.g. "Tuesday · Rain on the Glass" (an easter egg in Settings).
+    @Published private(set) var nowPlaying = ArcadeModel.describe(Music.themes[Music.todayIndex()])
+    static func describe(_ theme: MusicTheme) -> String { "\(theme.day) · \(theme.name)" }
+    /// Soft interface cues and the background music (Sounds.swift, Music.swift).
     let sounds = Sounds(enabled: Preferences.interfaceSounds && !ArcadeModel.quiet)
     /// The smoke test and --preview stay silent.
     static var quiet: Bool { isSmokeTest || isPreview }
@@ -75,6 +78,7 @@ import GameController
         }
         // Keep receiving controller input if macOS doesn't hand focus back after a game; see acceptsController.
         GCController.shouldMonitorBackgroundEvents = true
+        sounds.onTheme = { [weak self] theme in self?.nowPlaying = Self.describe(theme) }
         for name in [NSApplication.didBecomeActiveNotification, NSApplication.didResignActiveNotification] {
             observers.append(NotificationCenter.default.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in
                 Task { @MainActor in self?.updateBed() }

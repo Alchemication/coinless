@@ -14,7 +14,7 @@ enum CLI {
       ./play --check            Check MAME, games.json, and the installed games
       ./play --previews         Capture missing library pictures now
       ./play --facts dino       Every fact about a game, with sources
-      ./play --sounds           Hear the app's interface sounds and background music
+      ./play --sounds           Hear the interface sounds and the seven music themes
       ./play --inspect "final fight"
                                 What MAME needs to run a game, and a games.json entry to start from
 
@@ -245,8 +245,12 @@ enum CLI {
             print(style(pad(cue.rawValue, 10), .bold) + cue.meaning)
             play(Synth.samples(cue), for: Sounds.duration(cue) + 0.45)
         }
-        print(style(pad("bed", 10), .bold) + "background music on the library (12 seconds of the 24-second loop)")
-        play(Synth.bed(), for: 12)
+        let today = Music.todayIndex()
+        print("\nBackground music: seven themes, one for each day (10 seconds of each)")
+        for (index, theme) in Music.themes.enumerated() {
+            print(style(pad(theme.day, 10), .bold) + theme.name + (index == today ? style("  · today", .green) : ""))
+            play(Music.render(theme), for: 10)
+        }
         return 0
     }
 

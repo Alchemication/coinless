@@ -25,7 +25,9 @@ extension ArcadeModel {
                 let target = items[min(max(helpFocus.rawValue + (direction == .up ? -1 : 1), 0), items.count - 1)]
                 sounds.play(target == helpFocus ? .bump : .move)
                 helpFocus = target
-            case .left, .right: if helpFocus == .display { cycleDisplayStyle(direction == .right ? 1 : -1) }
+            case .left, .right:
+                if helpFocus == .display { cycleDisplayStyle(direction == .right ? 1 : -1) }
+                if helpFocus == .music && music { sounds.skip(direction == .right ? 1 : -1) }
             }
             return
         }
