@@ -158,9 +158,13 @@ Never commit game files, saves or generated folders; `.gitignore` covers them.
   fails with a message naming the entry.
 - **Licence:** MIT. Never vendor MAME code, ROMs, BIOS files, game art or
   long copied text; link to sources instead. One exception, Adam's call: the
-  site's hero ghosts (`site/images/ghosts/`) are real Street Fighter II and
-  Golden Axe stance sprites, shown as a tribute and credited in the footer.
-  Adding characters keeps that credit line true.
+  site's ghosts (`site/images/ghosts/`) are real sprites (and 3D-era portraits) from classic arcade
+  games, shown as a tribute and credited in the footer. Diversity matters:
+  `ghosts.js` deals a game first, then a sprite. A new sprite gets a clear
+  name and a line in `GAMES`; `check.py` fails on a file nothing uses. Clean
+  cut-outs come from flat-background rips or MAME captures of the player's
+  own games (flood-fill the background from the edges; no ML segmentation
+  needed for pixel art), never by getting around a site's bot protection.
 - **No backward-compat shims:** when moving code, update all callers. One
   exception: `Preferences.migrateFromArcade` (settings from the old app name).
 

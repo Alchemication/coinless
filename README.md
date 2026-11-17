@@ -107,6 +107,6 @@ Back up `cfg/`, `nvram/` and `sta/` yourself; Git doesn't hold them.
 
 ## Licence
 
-MIT (see [LICENSE](LICENSE)). Coinless contains no MAME code: it runs your separately installed `mame`, which has its own [licence](https://docs.mamedev.org/license.html). It includes no ROMs, BIOS files or games; obtaining them, and the right to use them, is up to you. The screenshots above show game artwork for illustration, and the site's faint background heroes are Street Fighter II (© Capcom) and Golden Axe (© Sega) sprites, shown as a tribute. Facts are short summaries that link to their sources.
+MIT (see [LICENSE](LICENSE)). Coinless contains no MAME code: it runs your separately installed `mame`, which has its own [licence](https://docs.mamedev.org/license.html). It includes no ROMs, BIOS files or games; obtaining them, and the right to use them, is up to you. The screenshots above show game artwork for illustration, and the site's faint background ghosts are sprites and portraits from 36 classic arcade games, © their makers, shown as a tribute. Facts are short summaries that link to their sources.
 
 Working on Coinless itself? [CLAUDE.md](CLAUDE.md) has the layout, rules and checks.

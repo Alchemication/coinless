@@ -36,11 +36,14 @@ def check(page: Path) -> list[str]:
 
 
 def ghosts() -> list[str]:
-    """Every sprite assets/ghosts.js names exists in images/ghosts/."""
+    """Every sprite assets/ghosts.js names exists in images/ghosts/, and every file there is used."""
     script = (SITE / "assets/ghosts.js").read_text(encoding="utf-8")
-    names = re.findall(r"'((?:sf2|goldenaxe)-[a-z-]+)'", script)
-    return [f"ghosts.js: images/ghosts/{name}.png doesn't exist" for name in names
-            if not (SITE / f"images/ghosts/{name}.png").exists()]
+    block = script[script.index("const GAMES"):script.index("  ]\n")]
+    names = set(re.findall(r"'([a-z0-9][a-z0-9-]*)'", block))
+    names -= {"icon", "figure", "portrait"}  # the kinds, not sprites
+    files = {path.stem for path in (SITE / "images/ghosts").glob("*.png")}
+    return ([f"ghosts.js: images/ghosts/{name}.png doesn't exist" for name in sorted(names - files)] +
+            [f"images/ghosts/{name}.png isn't used by ghosts.js" for name in sorted(files - names)])
 
 
 def main() -> int:

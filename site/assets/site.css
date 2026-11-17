@@ -95,6 +95,7 @@ p, li { text-wrap: pretty; }
   100% { opacity: 0; translate: 0 -12px; }
 }
 .ghost.still { animation: none; opacity: var(--peak); }
+.ghost.portrait img { border-radius: 50%; image-rendering: auto; -webkit-mask-image: radial-gradient(circle, #000 52%, transparent 71%); mask-image: radial-gradient(circle, #000 52%, transparent 71%); }
 .ghosts.sheet { position: relative; display: flex; flex-wrap: wrap; justify-content: center; gap: 36px; padding: 30px; background: var(--bg); z-index: 5; }
 .ghosts.sheet img { height: 150px; width: auto; image-rendering: pixelated; }
 
