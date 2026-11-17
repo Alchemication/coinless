@@ -1,8 +1,8 @@
 import Foundation
 
 /// The library's background music: seven original themes, one for each day of
-/// the week. The app opens on today's theme (Settings shows its name, a small
-/// easter egg), plays it a couple of times, then drifts into the next, so the
+/// the week. The app opens on today's theme (its name shows in the library's
+/// top bar), plays it a couple of times, then drifts into the next, so the
 /// library can be left on as something to listen to.
 struct MusicTheme: Sendable {
     let name: String

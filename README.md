@@ -78,7 +78,7 @@ Put each game's ZIP in `games/<folder>/` and BIOS or device ZIPs in `games/bios/
 
 **Back to the library from the couch:** hold **Options + Share** for a moment during a game. It quits like a normal exit, so saving works as usual. Esc works on the keyboard.
 
-**Sound:** seven quiet original themes, one for each day of the week, drift into one another on the library and fade out while you play, with soft sounds as you browse and start games. Settings shows what's playing (← → for another theme); `./play --sounds` plays them all.
+**Sound:** seven quiet original themes, one for each day of the week, drift into one another on the library and fade out while you play, with soft sounds as you browse and start games. The top bar shows what's playing; Settings has ← → for another theme; `./play --sounds` plays them all.
 
 **TV:** mirror the display, or make the TV the main display before opening Coinless; games open on the main display.
 

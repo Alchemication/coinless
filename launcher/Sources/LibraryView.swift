@@ -63,6 +63,17 @@ struct ArcadeView: View {
                 }
                 .transition(.opacity)
             }
+            if model.music {
+                HStack(spacing: 6) {
+                    Image(systemName: "music.note")
+                    Text(model.theme.name.uppercased())
+                        .id(model.theme.name)
+                        .transition(.asymmetric(insertion: .opacity.combined(with: .offset(y: 6)),
+                                                removal: .opacity.combined(with: .offset(y: -6))))
+                }
+                .help("Now playing: \(model.nowPlaying)")
+                .transition(.opacity)
+            }
             HStack(spacing: 8) {
                 Circle().fill(model.controllerCount > 0 ? Theme.accent : .gray).frame(width: 6, height: 6)
                 Text(model.controllerCount > 0 ? "\(model.controllerCount) CONTROLLER\(model.controllerCount == 1 ? "" : "S")" : "KEYBOARD READY")
@@ -77,6 +88,7 @@ struct ArcadeView: View {
         .tracking(1)
         .foregroundStyle(.white.opacity(0.62))
         .animation(.easeInOut(duration: 0.25), value: model.previewStatus)
+        .animation(.easeInOut(duration: 0.4), value: model.music)
     }
 
     private func details(_ game: Game, compact: Bool) -> some View {
