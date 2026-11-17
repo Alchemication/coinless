@@ -1,0 +1,13 @@
+#!/bin/zsh
+# Play from Terminal with the same settings as the Coinless app. Run ./play --help for options.
+set -eu
+APP="${0:A:h}/Coinless.app/Contents/MacOS/Coinless"
+if [[ ! -x "$APP" ]]; then
+  print -u2 "Coinless.app isn't built yet. Run: zsh launcher/build.sh"
+  exit 1
+fi
+case "${1:-}" in
+  "") exec "$APP" --list ;;
+  --check|--previews|--help|-h) exec "$APP" "$@" ;;
+  *) exec "$APP" --play "$@" ;;
+esac

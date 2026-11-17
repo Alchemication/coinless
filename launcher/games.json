@@ -10,7 +10,10 @@
     "symbol": "sun.max.fill",
     "color": "FF7356",
     "note": "Three buttons. One full power bar. Block + Kick + Punch.",
-    "saveStates": true
+    "saveStates": true,
+    "requires": [
+      "coh1001l"
+    ]
   },
   {
     "id": "dino",
@@ -23,7 +26,10 @@
     "symbol": "bolt.shield.fill",
     "color": "B8EA78",
     "note": "Bring a second controller. Attack, jump, and keep moving.",
-    "saveStates": true
+    "saveStates": true,
+    "requires": [
+      "qsound_hle"
+    ]
   },
   {
     "id": "tekken3",
@@ -114,7 +120,10 @@
     "symbol": "wand.and.stars",
     "color": "D49DE8",
     "note": "Check your inventory and keep your party together.",
-    "saveStates": true
+    "saveStates": true,
+    "requires": [
+      "qsound_hle"
+    ]
   },
   {
     "id": "avsp",
@@ -127,6 +136,9 @@
     "symbol": "scope",
     "color": "72C99A",
     "note": "Melee, jump, shoot. Watch both sides.",
-    "saveStates": true
+    "saveStates": true,
+    "requires": [
+      "qsound_hle"
+    ]
   }
 ]
