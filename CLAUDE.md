@@ -52,8 +52,14 @@ MAME facts this code depends on (checked on 0.289):
 
 - `-autosave` loads `auto.sta` by itself; `-state <slot>` is only for a
   manual slot and wins over autosave.
-- SIGTERM is a clean exit: MAME still writes `auto.sta`. Quitting Coinless
-  mid-game relies on this.
+- SIGTERM is not reliable: MAME on macOS often ignores it. To end a game
+  cleanly (Options + Share, quitting Coinless mid-game), Coinless creates the
+  file named in `COINLESS_QUIT_FILE`; `launcher/quit.lua` (`-autoboot_script`)
+  sees it and exits like Esc, so `-autosave` still writes `auto.sta`. It runs
+  on emulated frames, so a paused warning screen doesn't hear it.
+- A headless MAME still takes focus like any app unless it runs with
+  `SDL_MAC_BACKGROUND_APP=1` (`Previews` sets it), or a capture after a game
+  pulls the player out of Coinless.
 - `-seconds_to_run` saves a snapshot when it ends; with `-video none` this
   is how previews are captured.
 - `bgfx_path` and `artpath` default to folders relative to the working
@@ -112,6 +118,7 @@ launcher/
   games.json             the catalog
   Tools/Icon.swift       app icon generator
   Tools/readme-images.sh README images (ReadmeArt.swift draws the Terminal one)
+  quit.lua               MAME script: quits cleanly when Coinless asks
   Info.plist, build.sh
 docs/games.md            catalog, files, controls
 site/                    the public site (index.html, assets/, images/, check.py)

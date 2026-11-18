@@ -139,6 +139,8 @@ struct Library: Sendable {
     var biosFolder: URL { gamesFolder.appendingPathComponent("bios", isDirectory: true) }
     var stateRoot: URL { root.appendingPathComponent("sta", isDirectory: true) }
     var logFile: URL { root.appendingPathComponent("launcher/.build/mame-last.log") }
+    /// MAME runs it on every launch; it quits cleanly when Coinless asks (ArcadeModel.requestQuit).
+    var quitScript: URL { root.appendingPathComponent("launcher/quit.lua") }
     func romFolder(_ game: Game) -> URL { gamesFolder.appendingPathComponent(game.folder, isDirectory: true) }
     func stateFolder(_ game: Game) -> URL { stateRoot.appendingPathComponent(game.id, isDirectory: true) }
     func artFolder(_ game: Game) -> URL { root.appendingPathComponent("art", isDirectory: true).appendingPathComponent(game.id, isDirectory: true) }
@@ -188,7 +190,7 @@ struct Library: Sendable {
     func arguments(_ game: Game, fullscreen: Bool, mode: LaunchMode, style: DisplayStyle, mame: URL?) -> [String] {
         var arguments = [game.id, "-rompath", rompath(game), fullscreen ? "-nowindow" : "-window",
                          "-keepaspect", "-joystick", "-skip_gameinfo",
-                         "-state_directory", stateRoot.path]
+                         "-state_directory", stateRoot.path, "-autoboot_script", quitScript.path]
         arguments += style.arguments(share: mame.flatMap(Self.shareFolder), root: root)
         let saving = game.saveStates && mode != .noSave
         arguments.append(saving ? "-autosave" : "-noautosave")

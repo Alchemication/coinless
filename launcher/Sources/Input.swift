@@ -1,5 +1,6 @@
 import AppKit
 import GameController
+import os
 
 enum Direction: Equatable { case left, right, up, down }
 
@@ -107,28 +108,46 @@ extension ArcadeModel {
                 options(button, value, pressed)
                 Task { @MainActor in self?.holdExitChord("options", pressed: pressed, pad: token) }
             }
+            // macOS keeps a held Share for its screenshot gesture unless asked to pass it on too.
+            pad.buttonOptions?.preferredSystemGestureState = .alwaysReceive
             pad.buttonOptions?.pressedChangedHandler = { [weak self] _, _, pressed in   // Share
                 Task { @MainActor in self?.holdExitChord("share", pressed: pressed, pad: token) }
             }
         }
     }
 
+    static let padLog = Logger(subsystem: "local.emu.coinless", category: "pad")
+    static let exitHold = 1.5
+
     /// Options + Share held during a game quits it and returns to the library, saving like a normal quit.
     /// Works in the background (MAME is frontmost); a hold, so a passing press of both never ends a game.
     private func holdExitChord(_ button: String, pressed: Bool, pad: String) {
         if pressed { exitChord[pad, default: []].insert(button) } else { exitChord[pad]?.remove(button) }
-        guard running != nil, exitChord.values.contains(where: { $0.count == 2 }) else {
+        let holding = exitChord.values.contains { $0.count == 2 }
+        Self.padLog.notice("\(button, privacy: .public) \(pressed ? "down" : "up", privacy: .public); both held: \(holding); in a game: \(self.running != nil)")
+        guard running != nil else { exitHeldSince = nil; exitTask?.cancel(); exitTask = nil; return }
+        if holding {
+            guard exitHeldSince == nil else { return }
+            exitHeldSince = Date()
+            exitTask = Task { [weak self] in
+                try? await Task.sleep(for: .seconds(Self.exitHold))
+                guard let self, !Task.isCancelled, self.exitHeldSince != nil else { return }
+                self.leaveGame("held")
+            }
+        } else if let since = exitHeldSince {
+            exitHeldSince = nil
             exitTask?.cancel()
             exitTask = nil
-            return
+            // A late timer (macOS may slow a background app) mustn't swallow a full hold.
+            if Date().timeIntervalSince(since) >= Self.exitHold { leaveGame("released after a full hold") }
         }
-        guard exitTask == nil else { return }
-        exitTask = Task { [weak self] in
-            try? await Task.sleep(for: .seconds(1.5))
-            guard let self, !Task.isCancelled else { return }
-            self.exitTask = nil
-            self.endGame()
-        }
+    }
+
+    private func leaveGame(_ how: String) {
+        Self.padLog.notice("Options + Share \(how, privacy: .public): ending the game")
+        exitHeldSince = nil
+        exitTask = nil
+        requestQuit()
     }
 
     private func onPress(_ action: @escaping @MainActor (ArcadeModel) -> Void) -> GCControllerButtonValueChangedHandler {

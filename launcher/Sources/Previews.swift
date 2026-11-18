@@ -70,6 +70,8 @@ struct Previews: Sendable {
 
         let task = Process()
         task.executableURL = mame
+        // A headless capture must never take focus (it would pull you out of Coinless after a game).
+        task.environment = ProcessInfo.processInfo.environment.merging(["SDL_MAC_BACKGROUND_APP": "1"]) { $1 }
         task.arguments = arguments
         task.currentDirectoryURL = scratch
         task.standardInput = FileHandle.nullDevice

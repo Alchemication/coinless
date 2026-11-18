@@ -73,6 +73,11 @@ import GameController
     var scrollAccumulator: CGFloat = 0
     var exitChord: [String: Set<String>] = [:]
     var exitTask: Task<Void, Never>?
+    var exitHeldSince: Date?
+    /// Keeps macOS from napping Coinless behind MAME, so the controller is still heard (Options + Share).
+    private var gameActivity: NSObjectProtocol?
+    /// The file launcher/quit.lua watches for: creating it asks MAME to quit like Esc.
+    private var quitRequest: URL?
 
     init() {
         do { library = try Library() } catch {
@@ -276,7 +281,7 @@ import GameController
             let sandbox: URL? = Self.isSmokeTest ? FileManager.default.temporaryDirectory.appendingPathComponent("coinless-smoke-" + UUID().uuidString, isDirectory: true) : nil
             if let sandbox {
                 try FileManager.default.createDirectory(at: sandbox, withIntermediateDirectories: true)
-                arguments += ["-seconds_to_run", "2", "-nothrottle", "-video", "none", "-sound", "none",
+                arguments += ["-seconds_to_run", "30", "-nothrottle", "-video", "none", "-sound", "none",
                               "-cfg_directory", sandbox.path, "-nvram_directory", sandbox.path,
                               "-state_directory", sandbox.path, "-snapshot_directory", sandbox.path]
             }
@@ -289,6 +294,9 @@ import GameController
             task.executableURL = mame
             task.currentDirectoryURL = library.root
             task.arguments = arguments
+            let request = FileManager.default.temporaryDirectory.appendingPathComponent("coinless-quit-" + UUID().uuidString)
+            task.environment = ProcessInfo.processInfo.environment.merging(["COINLESS_QUIT_FILE": request.path]) { $1 }
+            quitRequest = request
             task.standardInput = FileHandle.nullDevice
             task.standardOutput = output
             task.standardError = output
@@ -307,8 +315,11 @@ import GameController
             playingTip = facts[game.id]?.facts.filter(\.kind.isAdvice).randomElement()
             sounds.play(.start)
             withAnimation(.easeInOut(duration: 0.3)) { running = game }
+            gameActivity = ProcessInfo.processInfo.beginActivity(options: .userInitiated, reason: "Listening for Options + Share during a game")
             updateBed()
             if !Self.isSmokeTest { Preferences.lastGame = game.id }
+            // The smoke test leaves the way Options + Share does: through the quit request.
+            if Self.isSmokeTest { Task { try? await Task.sleep(for: .seconds(4)); self.requestQuit() } }
         } catch {
             try? log?.close()
             log = nil
@@ -318,28 +329,43 @@ import GameController
         }
     }
 
-    /// Asks MAME to quit. MAME handles SIGTERM like a normal exit, so it still writes its automatic save.
-    /// Ends the running game like a normal quit: SIGTERM is a clean exit, so MAME still writes auto.sta,
-    /// and the usual return to the library follows.
-    func endGame() { process?.terminate() }
+    /// Ends the running game like Esc does, so MAME still writes auto.sta, and the usual return to
+    /// the library follows: launcher/quit.lua sees the request file and quits. If MAME hasn't gone
+    /// a few seconds later (a warning screen, say), SIGTERM as well, which it sometimes honours.
+    func requestQuit() {
+        guard let process, process.isRunning, let quitRequest else { return }
+        Self.padLog.notice("Asking MAME to quit")
+        FileManager.default.createFile(atPath: quitRequest.path, contents: nil)
+        Task { [weak self] in
+            try? await Task.sleep(for: .seconds(4))
+            guard let self, self.process === process, process.isRunning else { return }
+            Self.padLog.notice("MAME is still running 4 s after the quit request; sending SIGTERM too")
+            process.terminate()
+        }
+    }
 
     func stopGame(then completion: @escaping () -> Void) {
-        guard let process else { completion(); return }
+        guard process != nil else { completion(); return }
         quitAfterGame = completion
-        process.terminate()
+        requestQuit()
     }
 
     private func gameEnded(_ game: Game, status: Int32, reason: Process.TerminationReason, duration: TimeInterval, log logURL: URL, sandbox: URL?) {
         try? log?.close()
         log = nil
         process = nil
+        if let gameActivity { ProcessInfo.processInfo.endActivity(gameActivity) }
+        gameActivity = nil
+        if let quitRequest { try? FileManager.default.removeItem(at: quitRequest) }
+        quitRequest = nil
         withAnimation(.easeInOut(duration: 0.3)) { running = nil }
         if let quitAfterGame {
             self.quitAfterGame = nil
             quitAfterGame()
             return
         }
-        let failed = status != 0 || reason == .uncaughtSignal
+        // The smoke test asks MAME to quit after 4 s; running on to -seconds_to_run means it didn't listen.
+        let failed = status != 0 || reason == .uncaughtSignal || (sandbox != nil && duration > 20)
         if failed {
             let output = (try? String(contentsOf: logURL, encoding: .utf8)) ?? ""
             let tail = output.split(separator: "\n").suffix(10).joined(separator: "\n")

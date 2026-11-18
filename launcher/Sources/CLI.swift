@@ -159,6 +159,10 @@ enum CLI {
                   ? style("✓ ", .green) + "\(game.title) [\(game.id)]"
                   : style("! ", .yellow) + "\(game.title) [\(game.id)]: " + notes.joined(separator: "; "))
         }
+        if !Library.exists(library.quitScript) {
+            print(style("! ", .yellow) + "launcher/quit.lua is missing: Options + Share and quitting mid-game can't end a game cleanly.")
+            warnings += 1
+        }
         let music = NightTheme.problems
         for problem in music { print(style("! ", .yellow) + "Music: " + problem) }
         warnings += music.count
