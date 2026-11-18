@@ -139,7 +139,8 @@ Never commit game files, saves or generated folders; `.gitignore` covers them.
   is `@MainActor`; blocking work (MAME runs) goes in a detached task.
 - **Files by job** (`launcher/Sources/`), each well under ~400 lines:
   `Library` (paths, catalog, MAME arguments, `Preferences`), `ArcadeModel`
-  (state, launching, saves, previews), `Input` (pad, keyboard, trackpad),
+  (state, saves, previews), `Launching` (starting and ending a game: the quit
+  request, the way back), `Input` (pad, keyboard, trackpad),
   `Previews` (headless captures), `Facts` (facts format and checks),
   `MameInfo` (what MAME says a system needs, for `--inspect` and `--check`),
   `Sounds` (synthesised cues; the music player: two decks that crossfade),
