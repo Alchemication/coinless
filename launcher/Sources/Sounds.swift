@@ -1,7 +1,7 @@
 import AVFoundation
 
 /// Soft interface sounds and the library's background music (Music.swift), all
-/// synthesised: short triangle and filtered-square blips, and seven slow themes.
+/// synthesised: short triangle and filtered-square blips, and seventeen themes.
 /// All original (no game's sounds), quiet by design, and silent while a game runs.
 enum Cue: String, CaseIterable, Sendable {
     case move, bump, start, open, close, warn, welcome, error
@@ -116,14 +116,17 @@ enum Synth {
 @MainActor final class Sounds {
     var enabled: Bool
     /// Told whenever a different theme starts.
-    var onTheme: ((MusicTheme) -> Void)?
-    private(set) var theme = Music.todayIndex()
+    var onTheme: ((Track) -> Void)?
+    /// The track playing (an index into Music.tracks); High Score until it hands over.
+    private(set) var theme = Music.opening
+    private var opened = false
 
     private let engine = AVAudioEngine()
     private var players: [AVAudioPlayerNode] = []
     private var buffers: [Cue: AVAudioPCMBuffer] = [:]
     private var next = 0
     private let format = AVAudioFormat(standardFormatWithSampleRate: Synth.sampleRate, channels: 1)!
+    private let stereo = AVAudioFormat(standardFormatWithSampleRate: Synth.sampleRate, channels: 2)!
 
     private let bus = AVAudioMixerNode()
     private let decks = [AVAudioPlayerNode(), AVAudioPlayerNode()]
@@ -152,10 +155,10 @@ enum Synth {
             players.append(player)
         }
         engine.attach(bus)
-        engine.connect(bus, to: engine.mainMixerNode, format: format)
+        engine.connect(bus, to: engine.mainMixerNode, format: stereo)
         for deck in decks {
             engine.attach(deck)
-            engine.connect(deck, to: bus, format: format)
+            engine.connect(deck, to: bus, format: stereo)
         }
         bus.outputVolume = 0
         engine.mainMixerNode.outputVolume = 0.9
@@ -170,6 +173,14 @@ enum Synth {
         return buffer
     }
 
+    private func buffer(left: [Float], right: [Float]) -> AVAudioPCMBuffer? {
+        guard let buffer = AVAudioPCMBuffer(pcmFormat: stereo, frameCapacity: AVAudioFrameCount(left.count)) else { return nil }
+        buffer.frameLength = AVAudioFrameCount(left.count)
+        left.withUnsafeBufferPointer { buffer.floatChannelData![0].update(from: $0.baseAddress!, count: left.count) }
+        right.withUnsafeBufferPointer { buffer.floatChannelData![1].update(from: $0.baseAddress!, count: right.count) }
+        return buffer
+    }
+
     private func running() -> Bool {
         if !engine.isRunning { try? engine.start() }
         return engine.isRunning
@@ -177,16 +188,16 @@ enum Synth {
 
     // MARK: Music
 
-    /// Synthesises a theme in the background (a fraction of a second), once.
+    /// Synthesises a track in the background (a second or two for a night theme), once.
     private func prepare(_ index: Int) {
         guard rendered[index] == nil, !rendering.contains(index) else { return }
         rendering.insert(index)
-        let theme = Music.themes[index]
+        let track = Music.tracks[index]
         Task { [weak self] in
-            let samples = await Task.detached(priority: .utility) { Music.render(theme) }.value
+            let samples = await Task.detached(priority: .utility) { track.render() }.value
             guard let self else { return }
             self.rendering.remove(index)
-            self.rendered[index] = self.buffer(samples)
+            self.rendered[index] = self.buffer(left: samples.left, right: samples.right)
             if index == self.theme && self.audible { self.startLive() }
             if let pending = self.pendingSwitch, pending.theme == index {
                 self.pendingSwitch = nil
@@ -213,11 +224,14 @@ enum Synth {
         }
     }
 
-    /// Another theme, by a short crossfade (← → on the music setting).
+    /// Another track, by a short crossfade (← → on the music setting).
     func skip(_ step: Int) {
-        let count = Music.themes.count
+        let count = Music.tracks.count
         crossfade(to: ((theme + step) % count + count) % count, over: 2.5)
     }
+
+    /// What plays next: today's track after the opening theme, then the drift for the time of day.
+    private var upcoming: Int { opened ? Music.next(after: theme) : Music.today() }
 
     private func startLive() {
         guard let buffer = rendered[theme] else { prepare(theme); return }
@@ -227,7 +241,7 @@ enum Synth {
             deck.volume = 1
             deck.scheduleBuffer(buffer, at: nil, options: .loops)
             deckTheme[live] = theme
-            onTheme?(Music.themes[theme])
+            onTheme?(Music.tracks[theme])
         }
         if !deck.isPlaying { deck.play() }
         if crossfading, !decks[1 - live].isPlaying, deckTheme[1 - live] != nil { decks[1 - live].play() }
@@ -237,8 +251,8 @@ enum Synth {
                 try? await Task.sleep(for: .milliseconds(500))
                 guard let self, !Task.isCancelled else { return }
                 self.elapsed += 0.5
-                let due = Music.themes[self.theme].length * Self.loopsPerTheme
-                let following = (self.theme + 1) % Music.themes.count
+                let due = Music.tracks[self.theme].length * Self.loopsPerTheme
+                let following = self.upcoming
                 if self.elapsed > due - 20 { self.prepare(following) }
                 if self.elapsed >= due && !self.crossfading { self.crossfade(to: following, over: Self.crossfadeSeconds) }
             }
@@ -259,8 +273,9 @@ enum Synth {
         if audible { inDeck.play() }
         live = incoming
         theme = index
+        opened = true
         elapsed = 0
-        onTheme?(Music.themes[index])
+        onTheme?(Music.tracks[index])
         let steps = max(1, Int(seconds / 0.1))
         let startVolume = outDeck.volume
         Task { [weak self] in
@@ -275,7 +290,7 @@ enum Synth {
             self.deckTheme[outgoing] = nil
             self.crossfading = false
             // Keep only what's playing and what plays next.
-            let keep: Set<Int> = [self.theme, (self.theme + 1) % Music.themes.count]
+            let keep: Set<Int> = [self.theme, self.upcoming]
             self.rendered = self.rendered.filter { keep.contains($0.key) }
         }
     }

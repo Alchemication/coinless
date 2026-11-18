@@ -14,7 +14,7 @@ enum CLI {
       ./play --check            Check MAME, games.json, and the installed games
       ./play --previews         Capture missing library pictures now
       ./play --facts dino       Every fact about a game, with sources
-      ./play --sounds           Hear the interface sounds and the seven music themes
+      ./play --sounds           Hear the interface sounds and the music themes
       ./play --inspect "final fight"
                                 What MAME needs to run a game, and a games.json entry to start from
 
@@ -159,6 +159,9 @@ enum CLI {
                   ? style("✓ ", .green) + "\(game.title) [\(game.id)]"
                   : style("! ", .yellow) + "\(game.title) [\(game.id)]: " + notes.joined(separator: "; "))
         }
+        let music = NightTheme.problems
+        for problem in music { print(style("! ", .yellow) + "Music: " + problem) }
+        warnings += music.count
         print(warnings == 0 ? "Library and launch checks passed." : "Checks finished with \(warnings) warning\(warnings == 1 ? "" : "s").")
         return 0
     }
@@ -245,12 +248,25 @@ enum CLI {
             print(style(pad(cue.rawValue, 10), .bold) + cue.meaning)
             play(Synth.samples(cue), for: Sounds.duration(cue) + 0.45)
         }
-        let today = Music.todayIndex()
-        print("\nBackground music: seven themes, one for each day (10 seconds of each)")
-        for (index, theme) in Music.themes.enumerated() {
-            print(style(pad(theme.day, 10), .bold) + theme.name + (index == today ? style("  · today", .green) : ""))
-            play(Music.render(theme), for: 10)
+        print("\nBackground music: High Score opens, then today's theme (the original by day, its night version from 6 pm). 8 seconds of each:")
+        let stereo = AVAudioFormat(standardFormatWithSampleRate: Synth.sampleRate, channels: 2)!
+        let deck = AVAudioPlayerNode()
+        engine.attach(deck)
+        engine.connect(deck, to: engine.mainMixerNode, format: stereo)
+        let today = Music.today()
+        for (index, track) in Music.tracks.enumerated() {
+            let note = index == Music.opening ? "  · opens" : index == today ? "  · today, now" : ""
+            print(style(pad(track.isNight ? "night" : "day", 7), .dim) + track.label + style(note, .green))
+            let samples = track.render()
+            guard let buffer = AVAudioPCMBuffer(pcmFormat: stereo, frameCapacity: AVAudioFrameCount(samples.left.count)) else { continue }
+            buffer.frameLength = AVAudioFrameCount(samples.left.count)
+            samples.left.withUnsafeBufferPointer { buffer.floatChannelData![0].update(from: $0.baseAddress!, count: samples.left.count) }
+            samples.right.withUnsafeBufferPointer { buffer.floatChannelData![1].update(from: $0.baseAddress!, count: samples.right.count) }
+            deck.scheduleBuffer(buffer, at: nil, options: .interrupts)
+            deck.play()
+            Thread.sleep(forTimeInterval: 8)
         }
+        deck.stop()
         return 0
     }
 

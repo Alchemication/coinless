@@ -1,9 +1,40 @@
 import Foundation
 
-/// The library's background music: seven original themes, one for each day of
-/// the week. The app opens on today's theme (its name shows in the library's
-/// top bar), plays it a couple of times, then drifts into the next, so the
-/// library can be left on as something to listen to.
+/// The library's background music: seventeen themes. High Score opens; then today's
+/// title takes over, the original (soft, bell-led) by day and its night version
+/// (NightThemes.swift) from dusk. Each plays a couple of times, then drifts into the
+/// next of its half of the day, so the library can be left on as something to
+/// listen to. The name playing shows in the library's top bar.
+
+/// One piece of library music.
+enum Track: Sendable {
+    case original(MusicTheme), night(NightTheme)
+
+    var name: String {
+        switch self { case .original(let t): t.name; case .night(let t): t.name }
+    }
+    /// "Tuesday · Rain on the Glass", "Tuesday night · Rain on the Glass", or just "High Score".
+    var label: String {
+        switch self {
+        case .original(let t): "\(t.day) · \(t.name)"
+        case .night(let t): t.day.isEmpty ? t.name : "\(t.day) night · \(t.name)"
+        }
+    }
+    var length: Double {
+        switch self { case .original(let t): t.length; case .night(let t): t.length }
+    }
+    var isNight: Bool { if case .night = self { true } else { false } }
+
+    /// Stereo samples, ready to loop (an original is mono, on both sides).
+    func render() -> (left: [Float], right: [Float]) {
+        switch self {
+        case .original(let t): let samples = Music.render(t); return (samples, samples)
+        case .night(let t): return t.render()
+        }
+    }
+}
+
+/// One of the seven originals.
 struct MusicTheme: Sendable {
     let name: String
     let day: String
@@ -46,9 +77,64 @@ enum Music {
               barsPerChord: 2, arpeggio: .square, seed: 61),
     ]
 
-    /// Today's theme.
+    /// Today's original.
     static func todayIndex(_ date: Date = Date()) -> Int {
         Calendar.current.component(.weekday, from: date) - 1
+    }
+
+    // MARK: The playlist
+
+    /// Every track, in the order ← → steps through them in Settings: High Score, then
+    /// each day's original and night version, then the night themes without a day.
+    static let tracks: [Track] = {
+        let nights = NightTheme.all
+        var list: [Track] = nights.filter { $0.name == "High Score" }.map(Track.night)
+        for theme in themes {
+            list.append(.original(theme))
+            list += nights.filter { $0.day == theme.day }.map(Track.night)
+        }
+        list += nights.filter { $0.day.isEmpty && $0.name != "High Score" }.map(Track.night)
+        return list
+    }()
+    /// Plays first whenever Coinless opens.
+    static let opening = tracks.firstIndex { $0.name == "High Score" } ?? 0
+
+    /// Night runs from 6 pm to 6 am.
+    static func isNight(_ date: Date = Date()) -> Bool {
+        let hour = Calendar.current.component(.hour, from: date)
+        return hour >= 18 || hour < 6
+    }
+
+    /// Each half of the day's tracks, in the order they drift: the originals by weekday;
+    /// at night, each weekday's night theme, then the ones without a day.
+    private static func order(night: Bool) -> [Int] {
+        let days = themes.map(\.day)
+        func rank(_ track: Track) -> Int {
+            switch track {
+            case .original(let t): days.firstIndex(of: t.day) ?? 0
+            case .night(let t): days.firstIndex(of: t.day) ?? days.count
+            }
+        }
+        return tracks.indices.filter { tracks[$0].isNight == night }.sorted { (rank(tracks[$0]), $0) < (rank(tracks[$1]), $1) }
+    }
+
+    /// Today's title, in the version for the time of day.
+    static func today(_ date: Date = Date()) -> Int {
+        let day = themes[todayIndex(date)].day, night = isNight(date)
+        return tracks.firstIndex { track in
+            switch track {
+            case .original(let t): !night && t.day == day
+            case .night(let t): night && t.day == day
+            }
+        } ?? opening
+    }
+
+    /// What plays after `index`: the next of this half of the day's tracks, or today's
+    /// when `index` belongs to the other half (the evening turning into night).
+    static func next(after index: Int, date: Date = Date()) -> Int {
+        let list = order(night: isNight(date))
+        guard let position = list.firstIndex(of: index) else { return today(date) }
+        return list[(position + 1) % list.count]
     }
 
     /// One theme, ready to loop: a slow detuned pad, a soft bass note per chord, a

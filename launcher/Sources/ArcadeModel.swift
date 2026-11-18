@@ -42,10 +42,10 @@ import GameController
     @Published var interfaceSounds = Preferences.interfaceSounds {
         didSet { Preferences.interfaceSounds = interfaceSounds; sounds.enabled = interfaceSounds && !Self.quiet }
     }
-    /// The music theme playing now, e.g. "Tuesday · Rain on the Glass" (an easter egg in Settings).
-    /// The theme playing now (or next, while the music is paused); its name is in the top bar.
-    @Published private(set) var theme = Music.themes[Music.todayIndex()]
-    var nowPlaying: String { "\(theme.day) · \(theme.name)" }
+    /// The track playing now (or next, while the music is paused); its name is in the top bar,
+    /// and Settings shows `nowPlaying`, e.g. "Tuesday night · Rain on the Glass".
+    @Published private(set) var theme = Music.tracks[Music.opening]
+    var nowPlaying: String { theme.label }
     /// Soft interface cues and the background music (Sounds.swift, Music.swift).
     let sounds = Sounds(enabled: Preferences.interfaceSounds && !ArcadeModel.quiet)
     /// The smoke test and --preview stay silent.

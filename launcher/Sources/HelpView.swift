@@ -53,7 +53,7 @@ struct HelpView: View {
                                     .buttonStyle(.borderless).help("Next theme")
                             }
                         }
-                        Text(model.music ? "Now playing: \(model.nowPlaying). ← → for another theme." : "Seven quiet themes, one for each day of the week.")
+                        Text(model.music ? "Now playing: \(model.nowPlaying). ← → for another theme." : "High Score opens, then today's theme: the original by day, its night version from 6 pm.")
                             .font(.caption).foregroundStyle(.secondary)
                     }
                 }

@@ -78,7 +78,7 @@ Put each game's ZIP in `games/<folder>/` and BIOS or device ZIPs in `games/bios/
 
 **Back to the library from the couch:** hold **Options + Share** for a moment during a game. It quits like a normal exit, so saving works as usual. Esc works on the keyboard.
 
-**Sound:** seven quiet original themes, one for each day of the week, drift into one another on the library and fade out while you play, with soft sounds as you browse and start games. The top bar shows what's playing; Settings has ← → for another theme; `./play --sounds` plays them all.
+**Sound:** seventeen original themes drift into one another on the library and fade out while you play, with soft sounds as you browse and start games. *High Score* opens; then today's theme takes over, the soft original by day and its night version from 6 pm (piano in the rain, a music box, a choir and a ticking clock…). The top bar shows what's playing; Settings has ← → for another theme; `./play --sounds` plays them all.
 
 **TV:** mirror the display, or make the TV the main display before opening Coinless; games open on the main display.
 
@@ -99,7 +99,7 @@ Back up `cfg/`, `nvram/` and `sta/` yourself; Git doesn't hold them.
 ./play --facts tekken3       # every fact, with sources
 ./play --inspect mslug       # what MAME needs for a game
 ./play --check               # check MAME, the catalog and your files
-./play --sounds              # hear the interface sounds and the seven themes
+./play --sounds              # hear the interface sounds and all the music themes
 ./play --help                # everything else
 ```
 
