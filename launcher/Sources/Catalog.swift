@@ -2,7 +2,8 @@ import SwiftUI
 
 /// One entry in launcher/games.json.
 struct Game: Codable, Identifiable, Equatable, Sendable {
-    /// MAME short name, which is also the game ZIP's name without ".zip".
+    /// MAME short name, which is also the game ZIP's name without ".zip". For a console game, its
+    /// name in MAME's software list for that console (`hash/<system>.xml`).
     let id: String
     /// Folder under games/ that holds the game ZIP.
     let folder: String
@@ -20,9 +21,19 @@ struct Game: Codable, Identifiable, Equatable, Sendable {
     let requires: [String]?
     /// Seconds of attract mode to run before capturing the library preview.
     let previewAt: Int?
+    /// The console a cartridge runs on, as MAME names it ("snes"). Absent for arcade games.
+    let system: String?
 
     var tint: Color { Color(hex: color) }
     var requiredFiles: [String] { requires ?? [] }
+    /// The machine MAME runs: the console, or the arcade board itself. MAME names its
+    /// state and snapshot subfolders after it.
+    var machine: String { system ?? id }
+    /// The console's name as players know it, for the disc and marquee; nil for arcade games.
+    var platform: String? { system.map { Self.platforms[$0] ?? $0.uppercased() } }
+
+    static let platforms = ["snes": "SUPER NINTENDO", "nes": "NES", "gameboy": "GAME BOY",
+                            "gbcolor": "GAME BOY COLOR", "gba": "GAME BOY ADVANCE"]
 }
 
 extension Color {

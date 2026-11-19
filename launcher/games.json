@@ -140,5 +140,23 @@
     "requires": [
       "qsound_hle"
     ]
+  },
+  {
+    "id": "zelda3u",
+    "folder": "zelda-a-link-to-the-past",
+    "title": "Zelda: A Link to the Past",
+    "subtitle": "A sword, a lamp, and a rainy night.",
+    "genre": "ACTION ADVENTURE",
+    "year": "1992",
+    "players": "1 player",
+    "symbol": "triangle.fill",
+    "color": "52D273",
+    "note": "Sword on ✕, item on □. Share opens Save & Quit.",
+    "saveStates": true,
+    "requires": [
+      "snes"
+    ],
+    "system": "snes",
+    "previewAt": 16
   }
 ]

@@ -1,0 +1,22 @@
+{
+  "developer": "Nintendo",
+  "facts": [
+    { "kind": "origin", "text": "Work began in 1988 as a new NES Zelda. About a year in, the team moved it to the Super Nintendo.", "sources": [0] },
+    { "kind": "people", "text": "Directed by Takashi Tezuka and produced by Shigeru Miyamoto, with music by Koji Kondo.", "sources": [0] },
+    { "kind": "trivia", "text": "It filled an 8-megabit cartridge, twice the size of most Super Nintendo games of its day.", "sources": [0] },
+    { "kind": "trivia", "text": "To save space, the Dark World isn't a second map: the game draws it as an overlay on the Light World.", "sources": [0] },
+    { "kind": "origin", "text": "In Japan it's Kamigami no Triforce, \"Triforce of the Gods\". For the West, the priest Agahnim became a wizard.", "sources": [0] },
+    { "kind": "tip", "text": "Hold the sword button, then let go: a spin attack hits everything around you.", "sources": [1] },
+    { "kind": "tip", "text": "Four Pieces of Heart make a new Heart Container, one more unit of health. Search every corner.", "sources": [0] },
+    { "kind": "tip", "text": "Stuck in the Dark World? Only the Magic Mirror brings you back to the Light World.", "sources": [0] },
+    { "kind": "secret", "text": "Keep hitting a chicken in Kakariko and the whole flock takes revenge. Run indoors.", "sources": [2] },
+    { "kind": "secret", "text": "A hidden room holds 45 blue rupees and a note: \"My name is Chris Houlihan. This is my top secret room.\"", "sources": [0] },
+    { "kind": "trivia", "text": "MAME runs it on its Super Nintendo driver, which needs the console's sound chip ROM: snes.zip.", "sources": [3] }
+  ],
+  "sources": [
+    { "title": "Wikipedia: The Legend of Zelda: A Link to the Past", "url": "https://en.wikipedia.org/wiki/The_Legend_of_Zelda:_A_Link_to_the_Past" },
+    { "title": "Zelda Wiki: Spin Attack", "url": "https://zeldawiki.wiki/wiki/Spin_Attack" },
+    { "title": "Zelda Dungeon Wiki: Cucco", "url": "https://www.zeldadungeon.net/wiki/Cucco" },
+    { "title": "MAME 0.289: mame snes -listroms, mame snes -listxml" }
+  ]
+}

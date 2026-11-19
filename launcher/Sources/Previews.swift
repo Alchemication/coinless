@@ -52,9 +52,10 @@ struct Previews: Sendable {
         defer { try? fileManager.removeItem(at: scratch) }
         let snaps = scratch.appendingPathComponent("snap", isDirectory: true)
         let states = scratch.appendingPathComponent("sta", isDirectory: true)
-        try fileManager.createDirectory(at: states.appendingPathComponent(game.id), withIntermediateDirectories: true)
+        // MAME keeps states and snapshots in a subfolder named after the machine (the console, for a cartridge).
+        try fileManager.createDirectory(at: states.appendingPathComponent(game.machine), withIntermediateDirectories: true)
 
-        var arguments = [game.id, "-rompath", library.rompath(game), "-noreadconfig",
+        var arguments = library.machine(game, mame: mame) + ["-rompath", library.rompath(game), "-noreadconfig",
                          "-video", "none", "-sound", "none", "-nothrottle", "-skip_gameinfo", "-noautosave",
                          "-cfg_directory", scratch.path, "-nvram_directory", scratch.path, "-diff_directory", scratch.path,
                          "-state_directory", states.path, "-snapshot_directory", snaps.path]
@@ -64,7 +65,7 @@ struct Previews: Sendable {
             arguments += ["-seconds_to_run", String(game.previewAt ?? Self.defaultSeconds)]
         case .resume:
             guard let save = library.resumeFile(game) else { return }
-            try fileManager.copyItem(at: save, to: states.appendingPathComponent(game.id).appendingPathComponent(save.lastPathComponent))
+            try fileManager.copyItem(at: save, to: states.appendingPathComponent(game.machine).appendingPathComponent(save.lastPathComponent))
             arguments += ["-state", save.deletingPathExtension().lastPathComponent, "-seconds_to_run", "1"]
         }
 
@@ -84,7 +85,7 @@ struct Previews: Sendable {
             Thread.sleep(forTimeInterval: 0.1)
         }
 
-        let shots = (try? fileManager.contentsOfDirectory(at: snaps.appendingPathComponent(game.id), includingPropertiesForKeys: nil)) ?? []
+        let shots = (try? fileManager.contentsOfDirectory(at: snaps.appendingPathComponent(game.machine), includingPropertiesForKeys: nil)) ?? []
         guard let shot = shots.first(where: { $0.pathExtension == "png" }) else {
             throw ArcadeError("MAME didn't capture a preview for \(game.title).")
         }

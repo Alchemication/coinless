@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// Starting and ending a game: MAME's command line from Library, a quit request that
-/// launcher/quit.lua answers (so the automatic save is written), and the way back to
+/// Coinless's MAME plugin answers (so the automatic save is written), and the way back to
 /// the library. State lives in ArcadeModel.
 extension ArcadeModel {
     /// First press asks for confirmation; the second starts from the beginning.
@@ -96,8 +96,8 @@ extension ArcadeModel {
         }
     }
 
-    /// Ends the running game like Esc does, so MAME still writes auto.sta, and the usual return to
-    /// the library follows: launcher/quit.lua sees the request file and quits. If MAME hasn't gone
+    /// Ends the running game like Esc does, so MAME still writes auto.sta, and the usual return to the
+    /// library follows: Coinless's plugin (launcher/plugins/coinless) sees the request file and quits. If MAME hasn't gone
     /// a few seconds later (a warning screen, say), SIGTERM as well, which it sometimes honours.
     func requestQuit() {
         guard let process, process.isRunning, let quitRequest else { return }

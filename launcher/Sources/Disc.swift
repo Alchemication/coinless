@@ -28,23 +28,40 @@ struct Disc: View {
                     .transition(.opacity.combined(with: .scale(scale: 0.94)))
             }
 
+            // Console games say which console; arcade games need no label.
+            if let platform = game.platform {
+                DiscBadge(text: platform, symbol: "gamecontroller.fill", tint: game.tint)
+                    .offset(y: -diameter / 2 + 2)
+            }
+
             if saved {
-                Label("SAVED", systemImage: "clock.arrow.circlepath")
-                    .font(.system(size: 10, weight: .heavy, design: .monospaced))
-                    .tracking(1.5)
-                    .foregroundStyle(game.tint)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 5)
-                    .background(Theme.bezel, in: Capsule())
-                    .overlay(Capsule().strokeBorder(game.tint.opacity(0.6), lineWidth: 1))
+                DiscBadge(text: "SAVED", symbol: "clock.arrow.circlepath", tint: game.tint)
                     .offset(y: diameter / 2 - 2)
             }
         }
         .frame(width: diameter + 90, height: diameter + 90)
         .contentShape(Circle())
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(game.title + (saved ? ", saved game" : ""))
+        .accessibilityLabel(game.title + (game.platform.map { ", \($0.capitalized)" } ?? "") + (saved ? ", saved game" : ""))
         .accessibilityAddTraits(.isButton)
+    }
+}
+
+/// A small label sitting on the disc's bezel: SAVED below, the console above.
+struct DiscBadge: View {
+    let text: String
+    let symbol: String
+    let tint: Color
+
+    var body: some View {
+        Label(text, systemImage: symbol)
+            .font(.system(size: 10, weight: .heavy, design: .monospaced))
+            .tracking(1.5)
+            .foregroundStyle(tint)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 5)
+            .background(Theme.bezel, in: Capsule())
+            .overlay(Capsule().strokeBorder(tint.opacity(0.6), lineWidth: 1))
     }
 }
 

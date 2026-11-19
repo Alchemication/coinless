@@ -28,6 +28,7 @@ MAME at home, from Terminal: two variables and a long command per game, a dozen 
 - **Made for the couch.** Everything works from a PS4 controller, settings included. Big type that reads from across the room.
 - **Nothing to set up per game.** BIOS files are found automatically, and a missing one is named in plain words before MAME even starts.
 - **Hard to lose progress.** Starting over takes two presses and keeps a backup; quitting the app mid-game still saves.
+- **Console classics too.** MAME's Super Nintendo runs beside the arcade, with a pad layout that matches the SNES by position. *Zelda: A Link to the Past* is the first.
 - **Terminal too.** `./play dino` uses the same settings and saves, and shows the MAME command it runs.
 
 Coinless ships no games. You add the ones you want, using game files you have the right to use.
@@ -84,7 +85,7 @@ Put each game's ZIP in `games/<folder>/` and BIOS or device ZIPs in `games/bios/
 
 ## Saves
 
-For games MAME can save (`./play` shows which), **quit normally** and your place is saved to `sta/<game>/auto.sta`; next time, **Resume**. New game keeps the old save as `auto.sta.bak`. Quitting Coinless mid-game still saves. Turn saving off in Settings.
+For games MAME can save (`./play` shows which), **quit normally** and your place is saved to `sta/<game>/auto.sta` (`sta/<game>/snes/auto.sta` for a Super Nintendo game, whose own in-game saves are in `nvram/snes/`); next time, **Resume**. New game keeps the old save as `auto.sta.bak`. Quitting Coinless mid-game still saves. Turn saving off in Settings.
 
 For saves during play, set **Save State (Quick)** and **Load State (Quick)** in MAME's User Interface list, e.g. L3 and R3.
 

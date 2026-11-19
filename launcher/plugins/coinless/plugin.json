@@ -1,0 +1,10 @@
+{
+	"plugin": {
+		"name": "coinless",
+		"description": "Quits cleanly when Coinless asks",
+		"version": "1.0",
+		"author": "Coinless",
+		"type": "plugin",
+		"start": "false"
+	}
+}

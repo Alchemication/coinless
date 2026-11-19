@@ -24,9 +24,9 @@ build and checks below green.
 ## Project
 
 Coinless is Adam's personal, native macOS front end for Homebrew MAME,
-for arcade games from the couch: PS4 controllers, a TV, an Apple Silicon
-Mac. Tagline: *No more CONTINUE? 9… 8… 7…* It also makes MAME pleasant from
-Terminal (`./play`). It is not distributed, and ROMs never go in Git.
+for arcade games (and Super Nintendo cartridges) from the couch: PS4
+controllers, a TV, an Apple Silicon Mac. Tagline: *No more CONTINUE? 9… 8…
+7…* It also makes MAME pleasant from Terminal (`./play`). It is not distributed, and ROMs never go in Git.
 
 **Great UX is the priority.** The look is modern meets retro: round CRT
 screens with scanlines and a marquee, a blurred backdrop, spring motion,
@@ -37,7 +37,9 @@ couch-friendly option over the minimal one.
 How it fits together:
 
 - `launcher/games.json` is the catalog, read from the project at runtime
-  (no rebuild). A game appears when `games/<folder>/<id>.zip` exists.
+  (no rebuild). A game appears when `games/<folder>/<id>.zip` exists. A
+  console game adds `system` (`"snes"`): its `id` is the cartridge's name in
+  MAME's software list, and MAME runs `snes <id>`.
 - `Library.arguments` builds every MAME command line. The app and `./play`
   both use it; never assemble MAME arguments anywhere else.
 - `Preferences` (UserDefaults, domain `local.emu.coinless`) is shared by the
@@ -54,9 +56,23 @@ MAME facts this code depends on (checked on 0.289):
   manual slot and wins over autosave.
 - SIGTERM is not reliable: MAME on macOS often ignores it. To end a game
   cleanly (Options + Share, quitting Coinless mid-game), Coinless creates the
-  file named in `COINLESS_QUIT_FILE`; `launcher/quit.lua` (`-autoboot_script`)
-  sees it and exits like Esc, so `-autosave` still writes `auto.sta`. It runs
-  on emulated frames, so a paused warning screen doesn't hear it.
+  file named in `COINLESS_QUIT_FILE`; Coinless's plugin
+  (`launcher/plugins/coinless`, `-plugin coinless` with MAME's own plugins
+  folder on `-pluginspath` for `boot.lua`) sees it and exits like Esc, so
+  `-autosave` still writes `auto.sta`. It runs on emulated frames, so a
+  paused warning screen doesn't hear it.
+- MAME never runs an `-autoboot_script` when `-autosave` resumes a save; that's
+  why the quit request is a plugin.
+- `-seconds_to_run` counts emulated time including a loaded save's.
+- Console cartridges: `-noreadconfig` loses the software lists, so
+  `Library.arguments` passes `-hashpath`. MAME adds a subfolder named after
+  the machine to `-state_directory`, so console games get
+  `-state_directory sta/<id>` (saves in `sta/<id>/snes/`); otherwise every SNES
+  game would share one `auto.sta`. Battery saves are `nvram/snes/<id>.nv`.
+  `snes` needs `spc700.rom` (`games/bios/snes.zip`). `launcher/pads.cfg`
+  (`-ctrlr`) maps PS4 buttons by position; MAME treats it as the default, so
+  `cfg/snes.cfg` keeps only Adam's own changes. SDL pads: ✕ ○ □ △ are
+  buttons 1–4, L1 R1 5–6.
 - A headless MAME still takes focus like any app unless it runs with
   `SDL_MAC_BACKGROUND_APP=1` (`Previews` sets it), or a capture after a game
   pulls the player out of Coinless.
@@ -118,7 +134,8 @@ launcher/
   games.json             the catalog
   Tools/Icon.swift       app icon generator
   Tools/readme-images.sh README images (ReadmeArt.swift draws the Terminal one)
-  quit.lua               MAME script: quits cleanly when Coinless asks
+  plugins/coinless/      MAME plugin: quits cleanly when Coinless asks
+  pads.cfg               console pad layouts (-ctrlr)
   Info.plist, build.sh
 docs/games.md            catalog, files, controls
 site/                    the public site (index.html, assets/, images/, check.py)
@@ -216,8 +233,8 @@ Before reporting done:
   facts).
 - Swift 6 check:
   `xcrun swiftc -parse-as-library -typecheck -swift-version 6 launcher/Sources/*.swift`
-- `./Coinless.app/Contents/MacOS/Coinless --smoke-test`: launches and quits
-  Cadillacs headlessly in a sandbox.
+- `./Coinless.app/Contents/MacOS/Coinless --smoke-test [game]`: launches and
+  quits Cadillacs (or the named game) headlessly in a sandbox.
 - MAME arguments changed: `./play <game> --dry-run` for the affected modes.
 - UI changed: `./Coinless.app/Contents/MacOS/Coinless --preview [game]`,
   then look at `launcher/.build/preview.png`. It briefly opens a window.

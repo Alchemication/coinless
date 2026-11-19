@@ -116,7 +116,7 @@ enum CLI {
         }
         if dryRun { return 0 }
         if mode == .fresh, try library.setAsideAutosave(game) {
-            print(style("  Previous auto-save kept as sta/\(game.id)/auto.sta.bak", .dim))
+            print(style("  Previous auto-save kept as \(library.relativePath(library.stateFolder(game)))/auto.sta.bak", .dim))
         }
         Preferences.lastGame = game.id
         fflush(stdout)
@@ -146,21 +146,28 @@ enum CLI {
             do {
                 if try library.loadFacts(game) == nil { notes.append("no facts yet (game-facts skill)") }
             } catch { notes.append(error.localizedDescription) }
-            if let info = MachineInfo.load(game.id, mame: mame) {
+            if let info = MachineInfo.load(game.machine, mame: mame) {
                 if info.saveStates != game.saveStates {
                     notes.append("games.json says saveStates: \(game.saveStates), but MAME reports \(info.saveStates ? "supported" : "unsupported")")
                 }
-                if Set(info.requires) != Set(game.requiredFiles) {
-                    notes.append("games.json requires \(game.requiredFiles), but MAME needs \(info.requires)")
+                // A console's own files (its BIOS and devices) all come in one ZIP named after it.
+                let needed = game.system.map { [$0] } ?? info.requires
+                if Set(needed) != Set(game.requiredFiles) {
+                    notes.append("games.json requires \(game.requiredFiles), but MAME needs \(needed)")
                 }
+            }
+            if let system = game.system, missing.isEmpty,
+               !MachineInfo.verifyCartridge(game.id, system: system, rompath: library.rompath(game), mame: mame) {
+                notes.append("games/\(game.folder)/\(game.id).zip doesn't match MAME's \(system) software list")
             }
             warnings += notes.count
             print(notes.isEmpty
                   ? style("✓ ", .green) + "\(game.title) [\(game.id)]"
                   : style("! ", .yellow) + "\(game.title) [\(game.id)]: " + notes.joined(separator: "; "))
         }
-        if !Library.exists(library.quitScript) {
-            print(style("! ", .yellow) + "launcher/quit.lua is missing: Options + Share and quitting mid-game can't end a game cleanly.")
+        let pluginLoader = Library.mameShare(for: mame)?.appendingPathComponent("plugins/boot.lua")
+        if !Library.exists(library.quitPlugin) || !(pluginLoader.map(Library.exists) ?? false) {
+            print(style("! ", .yellow) + "Coinless's MAME plugin (launcher/plugins/coinless) or MAME's plugins folder is missing: Options + Share and quitting mid-game can't end a game cleanly.")
             warnings += 1
         }
         let music = NightTheme.problems
@@ -291,10 +298,11 @@ enum CLI {
         let resume = library.arguments(game, fullscreen: true, mode: .resume, style: .smooth, mame: mame)
         let noSave = library.arguments(game, fullscreen: false, mode: .noSave, style: .crt, mame: mame)
         let fresh = library.arguments(game, fullscreen: true, mode: .fresh, style: .sharp, mame: mame)
-        guard resume.first == game.id, resume.contains("-nowindow"), noSave.contains("-window"),
-              resume.contains(library.rompath(game)),
+        guard resume.first == game.machine, resume.contains("-nowindow"), noSave.contains("-window"),
+              resume.contains(library.rompath(game)), resume.contains(library.stateDirectory(game).path),
+              game.system == nil || (resume.dropFirst().first == game.id && resume.contains("-hashpath")),
               resume.contains(game.saveStates ? "-autosave" : "-noautosave"),
-              noSave.contains("-noautosave"), !fresh.contains("-state") else {
+              noSave.contains("-noautosave"), !fresh.contains("-state"), resume.contains("coinless") else {
             throw ArcadeError("Launch arguments for \(game.title) failed the self-check.")
         }
     }

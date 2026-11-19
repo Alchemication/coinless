@@ -96,6 +96,14 @@ struct MachineInfo: Sendable {
         return "{\n" + lines.joined(separator: "\n") + "\n}"
     }
 
+    /// Whether a cartridge ZIP matches MAME's software list for its console (`-verifysoftware`).
+    static func verifyCartridge(_ id: String, system: String, rompath: String, mame: URL) -> Bool {
+        var arguments = [system, "-verifysoftware", "-rompath", rompath]
+        if let hash = Library.hashFolder(for: mame) { arguments += ["-hashpath", hash.path] }
+        guard let output = run(mame, arguments).flatMap({ String(data: $0, encoding: .utf8) }) else { return false }
+        return output.contains("romset \(system):\(id) is good")
+    }
+
     private static func run(_ mame: URL, _ arguments: [String]) -> Data? {
         let task = Process()
         task.executableURL = mame

@@ -38,7 +38,9 @@ import AppKit
 
         if ArcadeModel.isSmokeTest {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                self.model.selection = self.model.games.firstIndex(where: { $0.id == "dino" }) ?? 0
+                // --smoke-test [game]: Cadillacs unless another installed game is named.
+                let id = CommandLine.arguments.drop(while: { $0 != "--smoke-test" }).dropFirst().first ?? "dino"
+                self.model.selection = self.model.games.firstIndex(where: { $0.id == id }) ?? 0
                 self.model.launch()
                 if self.model.running == nil { print(self.model.notice?.message ?? "Smoke launch failed"); exit(1) }
             }

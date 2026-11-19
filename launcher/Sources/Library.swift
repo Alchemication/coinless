@@ -126,6 +126,12 @@ struct Library: Sendable {
             for file in game.requiredFiles where !matches(file, "^[a-z0-9_]+$") {
                 throw ArcadeError("“\(file)” in \(game.title)'s requires list should be a ZIP name without “.zip”.")
             }
+            if let system = game.system {
+                guard matches(system, "^[a-z0-9_]+$") else { throw ArcadeError("“\(system)”, the system for \(game.title), isn't a valid MAME system name.") }
+                guard game.requiredFiles.contains(system) else {
+                    throw ArcadeError("\(game.title) runs on \(system), so its requires list needs “\(system)” (the console's own files, games/bios/\(system).zip).")
+                }
+            }
             if let seconds = game.previewAt, !(5...600).contains(seconds) {
                 throw ArcadeError("previewAt for \(game.title) should be between 5 and 600 seconds.")
             }
@@ -139,10 +145,21 @@ struct Library: Sendable {
     var biosFolder: URL { gamesFolder.appendingPathComponent("bios", isDirectory: true) }
     var stateRoot: URL { root.appendingPathComponent("sta", isDirectory: true) }
     var logFile: URL { root.appendingPathComponent("launcher/.build/mame-last.log") }
-    /// MAME runs it on every launch; it quits cleanly when Coinless asks (ArcadeModel.requestQuit).
-    var quitScript: URL { root.appendingPathComponent("launcher/quit.lua") }
+    /// Coinless's MAME plugin (launcher/plugins/coinless), enabled on every launch: it quits cleanly
+    /// when Coinless asks (ArcadeModel.requestQuit).
+    var pluginsFolder: URL { root.appendingPathComponent("launcher/plugins", isDirectory: true) }
+    var quitPlugin: URL { pluginsFolder.appendingPathComponent("coinless/init.lua") }
     func romFolder(_ game: Game) -> URL { gamesFolder.appendingPathComponent(game.folder, isDirectory: true) }
-    func stateFolder(_ game: Game) -> URL { stateRoot.appendingPathComponent(game.id, isDirectory: true) }
+    /// MAME's -state_directory. MAME adds a subfolder named after the machine, so a console game
+    /// gets a folder of its own; otherwise every game on that console would share one auto.sta.
+    func stateDirectory(_ game: Game) -> URL {
+        game.system == nil ? stateRoot : stateRoot.appendingPathComponent(game.id, isDirectory: true)
+    }
+    /// Where the game's saves are: sta/<id>/ for arcade games, sta/<id>/<system>/ for console games.
+    func stateFolder(_ game: Game) -> URL { stateDirectory(game).appendingPathComponent(game.machine, isDirectory: true) }
+    /// Coinless's own controller layouts (launcher/pads.cfg): console pads mapped by position. Your
+    /// own changes in MAME's menu are saved to cfg/ and win over these.
+    var padsFile: URL { root.appendingPathComponent("launcher/pads.cfg") }
     func artFolder(_ game: Game) -> URL { root.appendingPathComponent("art", isDirectory: true).appendingPathComponent(game.id, isDirectory: true) }
     func rompath(_ game: Game) -> String { [romFolder(game).path, biosFolder.path].joined(separator: ";") }
 
@@ -185,12 +202,37 @@ struct Library: Sendable {
         return true
     }
 
+    /// A path inside the project, as shown to the player ("sta/zelda3u/snes").
+    func relativePath(_ url: URL) -> String {
+        let path = url.standardizedFileURL.path, base = root.standardizedFileURL.path + "/"
+        return path.hasPrefix(base) ? String(path.dropFirst(base.count)) : path
+    }
+
     // MARK: MAME
 
+    /// What MAME should run, first on its command line: the arcade set, or the console and its cartridge.
+    /// Cartridges are found through MAME's software lists, which -noreadconfig would otherwise lose.
+    func machine(_ game: Game, mame: URL?) -> [String] {
+        guard let system = game.system else { return [game.id] }
+        return [system, game.id] + (mame.flatMap(Self.hashFolder).map { ["-hashpath", $0.path] } ?? [])
+    }
+
     func arguments(_ game: Game, fullscreen: Bool, mode: LaunchMode, style: DisplayStyle, mame: URL?) -> [String] {
-        var arguments = [game.id, "-rompath", rompath(game), fullscreen ? "-nowindow" : "-window",
-                         "-keepaspect", "-joystick", "-skip_gameinfo",
-                         "-state_directory", stateRoot.path, "-autoboot_script", quitScript.path]
+        var arguments = machine(game, mame: mame)
+        arguments += ["-rompath", rompath(game), fullscreen ? "-nowindow" : "-window",
+                      "-keepaspect", "-joystick", "-skip_gameinfo",
+                      "-state_directory", stateDirectory(game).path]
+        // MAME's plugin loader (boot.lua) lives in its own plugins folder, so both folders are needed.
+        // Only Coinless's plugin runs; MAME's two default ones stay off, as they were without a plugins path.
+        if let plugins = mame.flatMap(Self.mameShare)?.appendingPathComponent("plugins", isDirectory: true),
+           Self.exists(plugins.appendingPathComponent("boot.lua")) {
+            arguments += ["-pluginspath", [plugins.path, pluginsFolder.path].joined(separator: ";"),
+                          "-plugin", "coinless", "-noplugin", "data,layout"]
+        }
+        if game.system != nil, Self.exists(padsFile) {
+            arguments += ["-ctrlrpath", padsFile.deletingLastPathComponent().path,
+                          "-ctrlr", padsFile.deletingPathExtension().lastPathComponent]
+        }
         arguments += style.arguments(share: mame.flatMap(Self.shareFolder), root: root)
         let saving = game.saveStates && mode != .noSave
         arguments.append(saving ? "-autosave" : "-noautosave")
@@ -206,11 +248,21 @@ struct Library: Sendable {
         return candidates.first(where: { FileManager.default.isExecutableFile(atPath: $0) }).map { URL(fileURLWithPath: $0) }
     }
 
-    /// MAME's installed share/mame folder (shaders and artwork), if present.
-    static func shareFolder(for mame: URL) -> URL? {
+    /// MAME's installed share/mame folder: shaders, artwork, plugins and software lists.
+    static func mameShare(for mame: URL) -> URL? {
         let share = mame.resolvingSymlinksInPath().deletingLastPathComponent().deletingLastPathComponent()
             .appendingPathComponent("share/mame", isDirectory: true)
-        return exists(share.appendingPathComponent("bgfx/chains/crt-geom.json")) ? share : nil
+        return exists(share) ? share : nil
+    }
+
+    /// The share folder, if it has the CRT style's shaders.
+    static func shareFolder(for mame: URL) -> URL? {
+        mameShare(for: mame).flatMap { exists($0.appendingPathComponent("bgfx/chains/crt-geom.json")) ? $0 : nil }
+    }
+
+    /// MAME's software lists (share/mame/hash), which name every cartridge it knows.
+    static func hashFolder(for mame: URL) -> URL? {
+        mameShare(for: mame).map { $0.appendingPathComponent("hash", isDirectory: true) }.flatMap { exists($0) ? $0 : nil }
     }
 
     /// A plain-language reason for a MAME exit status (see MAME's documented exit codes).

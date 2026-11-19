@@ -78,7 +78,7 @@ import GameController
     var exitHeldSince: Date?
     /// Keeps macOS from napping Coinless behind MAME, so the controller is still heard (Options + Share).
     var gameActivity: NSObjectProtocol?
-    /// The file launcher/quit.lua watches for: creating it asks MAME to quit like Esc.
+    /// The file Coinless's MAME plugin (launcher/plugins/coinless) watches for: creating it asks MAME to quit like Esc.
     var quitRequest: URL?
 
     init() {

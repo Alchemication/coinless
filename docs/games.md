@@ -18,6 +18,7 @@ Keep ZIPs compressed and keep their original names: MAME finds games by file nam
 | Knights of the Round (1991) | `knights` | `knights-of-the-round` | — | Yes |
 | Dungeons & Dragons: Shadow over Mystara (1996) | `ddsom` | `shadow-over-mystara` | `qsound_hle.zip` | Yes |
 | Alien vs. Predator (1994) | `avsp` | `alien-vs-predator` | `qsound_hle.zip` | Yes |
+| Zelda: A Link to the Past (1992, Super Nintendo) | `zelda3u` | `zelda-a-link-to-the-past` | `snes.zip` (the console's sound ROM) | Yes |
 
 Names, dependencies, and save support were checked against MAME 0.289. After a MAME update, run `./play --check` to recheck save support.
 
@@ -37,6 +38,16 @@ cp ~/Downloads/qsound_hle.zip games/bios/
 ```sh
 mame dino -rompath "games/cadillacs-and-dinosaurs;games/bios" -verifyroms
 ```
+
+### Console games
+
+MAME also emulates home consoles. A console game is a cartridge from MAME's software list for that console (`share/mame/hash/<system>.xml`), so its `id` is the list's name for it and `games.json` adds `"system"`. For the Super Nintendo:
+
+- The cartridge ZIP is named after its list entry and holds the ROM under the list's file name: `games/zelda-a-link-to-the-past/zelda3u.zip` holds `sns-zl-0.u1`. A plain `.sfc` dump is the same bytes: zip it under that name.
+- `games/bios/snes.zip` holds `spc700.rom`, the console's 64-byte sound ROM (`mame snes -listroms`). Every Super Nintendo game shares it.
+- `./play --check` checks the cartridge against the software list (`mame snes -verifysoftware`).
+- Saves: the resume point is `sta/<id>/snes/auto.sta`, one folder per game. The game's own saves (battery memory) are `nvram/snes/<id>.nv`.
+- Controls: [launcher/pads.cfg](../launcher/pads.cfg) maps the PS4 pad by position: ✕ B, ○ A, □ Y, △ X, L1 L, R1 R, Options Start, Share Select. Keys: A S D F G H for Y B A X L R, 1 Start, 5 Select. Changes in MAME's menu are saved in `cfg/snes.cfg` and win over it.
 
 This confirms the files MAME needs, not playability. Known result: Heaven's Gate warns that `78081g503.ic655` has **NO GOOD DUMP KNOWN**. MAME accepts it as the best available dump and reports the set as OK.
 
@@ -58,6 +69,7 @@ Remap buttons in **Tab → Input Settings → Input Assignments (this system)** 
 | Knights of the Round | 2 | A, S | Attack, jump |
 | Shadow over Mystara | 4 | A, S, D, F | Attack, jump, select item, use item |
 | Alien vs. Predator | 3 | A, S, D | Attack, jump, shoot |
+| Zelda: A Link to the Past | 6 (SNES pad) | A, S, D, F (Y, B, A, X); 1 Start, 5 Select | ✕ sword, ○ action, □ item, △ map (set by `launcher/pads.cfg`) |
 
 The button counts come from MAME's input definitions; an exposed button isn't always a separate action. The suggested letter keys overlap MAME's default player 2 keys, so give player 2 a controller.
 
@@ -77,6 +89,12 @@ MAME marks the graphics as imperfect and can't save this game. This is the arcad
 
 Up jumps and down crouches. Hold away from your opponent to block, and down-away to block low. With Ryu or Ken, roll down to forward, then punch, for a fireball. Directions flip when you switch sides.
 
+### Zelda: A Link to the Past
+
+Sword on ✕, action (lift, talk, read) on ○, the equipped item on □, the map on △. Options opens the item screen. The game saves itself: press Share for **SAVE AND QUIT**, or pick **SAVE AND CONTINUE** at game over; it keeps three files in `nvram/snes/zelda3u.nv`. Coinless's resume point comes on top, so quitting with Options + Share puts you back exactly where you were. New game sets only the resume point aside; the game's own files stay.
+
+*Ocarina of Time* (Nintendo 64) isn't possible yet: MAME's Nintendo 64 driver is preliminary and can't save states.
+
 ## Adding a new game by hand
 
 An agent can do all of this with the `add-game` skill. By hand: run `./play --inspect "<title>"`, add its suggested entry to [launcher/games.json](../launcher/games.json) and fill in the TODOs. The app reads the catalog at every refresh, so no rebuild is needed.
@@ -91,9 +109,6 @@ An agent can do all of this with the `add-game` skill. By hand: run `./play --in
 | `saveStates` | Whether MAME can save this game (`./play --check` compares it with MAME) |
 | `requires` | Optional. Extra BIOS/device ZIPs without `.zip`, e.g. `["qsound_hle"]` |
 | `previewAt` | Optional. Seconds of attract mode before the preview is captured (default 50) |
+| `system` | Console games only. MAME's name for the console, e.g. `"snes"`; `requires` then lists it too |
 
 Optional extras: facts in `launcher/facts/<id>.json` (`game-facts` skill) and your own picture at `art/<id>/cover.png`.
-
-## Zelda (not set up yet)
-
-*A Link to the Past* (Super Nintendo) and *Ocarina of Time* (Nintendo 64) are on the wish list. They need console emulation, which this project doesn't configure yet.
