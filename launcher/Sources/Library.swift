@@ -157,8 +157,8 @@ struct Library: Sendable {
     }
     /// Where the game's saves are: sta/<id>/ for arcade games, sta/<id>/<system>/ for console games.
     func stateFolder(_ game: Game) -> URL { stateDirectory(game).appendingPathComponent(game.machine, isDirectory: true) }
-    /// Coinless's own controller layouts (launcher/pads.cfg): console pads mapped by position. Your
-    /// own changes in MAME's menu are saved to cfg/ and win over these.
+    /// Coinless's controls for every game (launcher/pads.cfg): keys and the PS4 pad, as MAME's
+    /// defaults. Your own changes in MAME's menu are saved to cfg/ and win over these.
     var padsFile: URL { root.appendingPathComponent("launcher/pads.cfg") }
     func artFolder(_ game: Game) -> URL { root.appendingPathComponent("art", isDirectory: true).appendingPathComponent(game.id, isDirectory: true) }
     func rompath(_ game: Game) -> String { [romFolder(game).path, biosFolder.path].joined(separator: ";") }
@@ -229,7 +229,7 @@ struct Library: Sendable {
             arguments += ["-pluginspath", [plugins.path, pluginsFolder.path].joined(separator: ";"),
                           "-plugin", "coinless", "-noplugin", "data,layout"]
         }
-        if game.system != nil, Self.exists(padsFile) {
+        if Self.exists(padsFile) {
             arguments += ["-ctrlrpath", padsFile.deletingLastPathComponent().path,
                           "-ctrlr", padsFile.deletingPathExtension().lastPathComponent]
         }

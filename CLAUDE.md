@@ -69,10 +69,16 @@ MAME facts this code depends on (checked on 0.289):
   the machine to `-state_directory`, so console games get
   `-state_directory sta/<id>` (saves in `sta/<id>/snes/`); otherwise every SNES
   game would share one `auto.sta`. Battery saves are `nvram/snes/<id>.nv`.
-  `snes` needs `spc700.rom` (`games/bios/snes.zip`). `launcher/pads.cfg`
-  (`-ctrlr`) maps PS4 buttons by position; MAME treats it as the default, so
-  `cfg/snes.cfg` keeps only Adam's own changes. SDL pads: ✕ ○ □ △ are
-  buttons 1–4, L1 R1 5–6.
+  `snes` needs `spc700.rom` (`games/bios/snes.zip`).
+- Controls: `launcher/pads.cfg` (`-ctrlr`, every game) is MAME's defaults:
+  a `default` section (buttons 1–6 on keys and □ ✕ ○ △ L1 R1, both players)
+  plus a section per game or console with its own standard layout. `cfg/` then keeps only
+  Adam's own changes from MAME's menu, which win; MAME never writes the
+  ctrlr file's bindings into `cfg/`. A tagged port must match tag, mask and
+  defvalue exactly or MAME ignores it silently. A binding made only of
+  codes for an absent pad is dropped, so every binding also has a key.
+  SDL pads: ✕ ○ □ △ are buttons 1–4, L1 R1 5–6; Options is `START`, Share
+  `SELECT` (MAME's own defaults for Start and Coin).
 - A headless MAME still takes focus like any app unless it runs with
   `SDL_MAC_BACKGROUND_APP=1` (`Previews` sets it), or a capture after a game
   pulls the player out of Coinless.
@@ -135,7 +141,7 @@ launcher/
   Tools/Icon.swift       app icon generator
   Tools/readme-images.sh README images (ReadmeArt.swift draws the Terminal one)
   plugins/coinless/      MAME plugin: quits cleanly when Coinless asks
-  pads.cfg               console pad layouts (-ctrlr)
+  pads.cfg               controls for every game: keys and PS4 pads (-ctrlr)
   Info.plist, build.sh
 docs/games.md            catalog, files, controls
 site/                    the public site (index.html, assets/, images/, check.py)

@@ -77,6 +77,8 @@ Put each game's ZIP in `games/<folder>/` and BIOS or device ZIPs in `games/bios/
 | Back to the library (in a game) | Hold Options + Share | Esc | |
 | Quit Coinless | Options, then **Quit Coinless** | ⌘Q | Settings → **Quit Coinless** |
 
+**In a game:** the pad and the keyboard both work from the start: □ ✕ ○ △ L1 R1 (attack □, jump ✕) or A S D F G H, Options to start, Share for a coin; player 2 on a second pad (or Q W E R T Y and I J K L). Layouts per game are in [docs/games.md](docs/games.md#controls); remap in MAME's menu (Tab) and your change wins.
+
 **Back to the library from the couch:** hold **Options + Share** for a moment during a game. It quits like a normal exit, so saving works as usual. Esc works on the keyboard.
 
 **Sound:** seventeen original themes drift into one another on the library and fade out while you play, with soft sounds as you browse and start games. *High Score* opens; then today's theme takes over, the soft original by day and its night version from 6 pm (piano in the rain, a music box, a choir and a ticking clock…). The top bar shows what's playing; Settings has ← → for another theme; `./play --sounds` plays them all.

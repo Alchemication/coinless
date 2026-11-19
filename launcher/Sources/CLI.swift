@@ -302,7 +302,8 @@ enum CLI {
               resume.contains(library.rompath(game)), resume.contains(library.stateDirectory(game).path),
               game.system == nil || (resume.dropFirst().first == game.id && resume.contains("-hashpath")),
               resume.contains(game.saveStates ? "-autosave" : "-noautosave"),
-              noSave.contains("-noautosave"), !fresh.contains("-state"), resume.contains("coinless") else {
+              noSave.contains("-noautosave"), !fresh.contains("-state"), resume.contains("coinless"),
+              resume.contains("-ctrlr") else {
             throw ArcadeError("Launch arguments for \(game.title) failed the self-check.")
         }
     }

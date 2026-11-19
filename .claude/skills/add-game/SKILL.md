@@ -48,6 +48,8 @@ Add the draft to `launcher/games.json`, next to games of the same kind, and fill
 - `note`: one plain line on how to play.
 - Keep `saveStates` and `requires` exactly as `--inspect` reported.
 
+**Controls.** A new game already works with keys and a PS4 pad: `launcher/pads.cfg`'s `default` section maps buttons 1–6 to A S D F G H and □ ✕ ○ △ L1 R1 (attack □, jump ✕). Give it its own section there only when the game has its own standard pad layout (Tekken's limbs, Street Fighter's punch and kick rows), with each port's tag, mask and defvalue dumped from MAME in a sandbox, then check the result the same way. Never put bindings in the player's `cfg/`.
+
 ## 4. Facts and tips
 
 - Follow the `game-facts` skill for `launcher/facts/<id>.json`.
@@ -55,7 +57,7 @@ Add the draft to `launcher/games.json`, next to games of the same kind, and fill
 
 ## 5. Docs
 
-`docs/games.md`: a row in the Files table and the Controls table. A console game also gets a Game notes section on its own saves.
+`docs/games.md`: a row in the Files table and the Controls table (keys and pad as `pads.cfg` sets them). A console game also gets a Game notes section on its own saves.
 
 ## 6. Check
 

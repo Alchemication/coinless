@@ -47,31 +47,42 @@ MAME also emulates home consoles. A console game is a cartridge from MAME's soft
 - `games/bios/snes.zip` holds `spc700.rom`, the console's 64-byte sound ROM (`mame snes -listroms`). Every Super Nintendo game shares it.
 - `./play --check` checks the cartridge against the software list (`mame snes -verifysoftware`).
 - Saves: the resume point is `sta/<id>/snes/auto.sta`, one folder per game. The game's own saves (battery memory) are `nvram/snes/<id>.nv`.
-- Controls: [launcher/pads.cfg](../launcher/pads.cfg) maps the PS4 pad by position: ✕ B, ○ A, □ Y, △ X, L1 L, R1 R, Options Start, Share Select. Keys: A S D F G H for Y B A X L R, 1 Start, 5 Select. Changes in MAME's menu are saved in `cfg/snes.cfg` and win over it.
+- Controls: [launcher/pads.cfg](../launcher/pads.cfg) maps the PS4 pad by position: ✕ B, ○ A, □ Y, △ X, L1 L, R1 R, Options Start, Share Select. Keys: A S D F G H for Y B A X L R, 1 Start, 5 Select (player 2: Q W E R T Y, 2, 6). Every Super Nintendo game shares the layout; changes in MAME's menu are saved in `cfg/snes.cfg`.
 
 This confirms the files MAME needs, not playability. Known result: Heaven's Gate warns that `78081g503.ic655` has **NO GOOD DUMP KNOWN**. MAME accepts it as the best available dump and reports the set as OK.
 
 ## Controls
 
-MAME's default keys: arrows move; **Left Control, Left Option, Space, Left Shift, Z, X** are buttons 1–6; **5** adds a coin and **1** starts (**6** and **2** for player 2). **Tab** opens MAME's menu, **P** pauses, **F11** shows emulation speed (hold Fn on a Mac keyboard), and **Esc** quits.
+Every game works from the keyboard and a PS4 pad without setup. [launcher/pads.cfg](../launcher/pads.cfg) holds Coinless's layouts, and MAME treats them as its defaults:
 
-Remap buttons in **Tab → Input Settings → Input Assignments (this system)** so each game keeps its own layout (saved in `cfg/<game>.cfg`). Assignments under **(general)** apply to every game (`cfg/default.cfg`). Quit with Esc so MAME saves changes. To clear an unwanted extra binding, select it and press Delete, then assign again.
+| | Move | Buttons 1–6 | Start | Coin |
+| --- | --- | --- | --- | --- |
+| Player 1 keys | arrows | A S D F G H | 1 | 5 |
+| Player 1 pad | D-pad or left stick | □ ✕ ○ △ L1 R1 | Options | Share |
+| Player 2 keys | I J K L | Q W E R T Y | 2 | 6 |
+| Player 2 pad | second pad, same layout | | | |
 
-| Game | Buttons | Suggested keys (buttons 1 onward) | Usual actions (confirm in play) |
-| --- | --- | --- | --- |
-| Heaven's Gate | 3 | A, S, D | Guard, punch, kick (check in play) |
-| Cadillacs and Dinosaurs | 2 | A, S | Attack, jump; both together for a special that costs health |
-| Tekken 3 | 4 | A, S, Z, X | Left punch, right punch, left kick, right kick. Hold back to guard |
-| Street Fighter II | 6 | A, S, D / Z, X, C | Light, medium, heavy punch / light, medium, heavy kick |
-| Final Fight | 3 | A, S, D | Attack, jump |
-| Golden Axe | 3 | A, S, D | Magic, attack, jump |
-| The King of Dragons | 2 | A, S | Attack, jump |
-| Knights of the Round | 2 | A, S | Attack, jump |
-| Shadow over Mystara | 4 | A, S, D, F | Attack, jump, select item, use item |
-| Alien vs. Predator | 3 | A, S, D | Attack, jump, shoot |
-| Zelda: A Link to the Past | 6 (SNES pad) | A, S, D, F (Y, B, A, X); 1 Start, 5 Select | ✕ sword, ○ action, □ item, △ map (set by `launcher/pads.cfg`) |
+So attack is □ and jump ✕, as on PlayStation releases of these games. Most games need nothing more; a game with its own standard layout (Tekken, Street Fighter) gets its own section in `pads.cfg`. **Tab** opens MAME's menu, **P** pauses, **F11** shows emulation speed (hold Fn on a Mac keyboard), and **Esc** quits.
 
-The button counts come from MAME's input definitions; an exposed button isn't always a separate action. The suggested letter keys overlap MAME's default player 2 keys, so give player 2 a controller.
+To change a layout for yourself, use **Tab → Input Settings → Input Assignments**: **(this system)** for one game (saved in `cfg/<game>.cfg`; a console's games share `cfg/<system>.cfg`), **(general)** for every game (`cfg/default.cfg`). Your changes win over `pads.cfg`. Quit with Esc so MAME saves them. To clear an unwanted extra binding, select it and press Delete, then assign again.
+
+| Game | Buttons | Keys | Pad | Actions (confirm in play) |
+| --- | --- | --- | --- | --- |
+| Heaven's Gate | 3 | A, S, D | □ ✕ ○ | Guard, punch, kick |
+| Cadillacs and Dinosaurs | 2 | A, S | □ ✕ | Attack, jump; both together for a special that costs health |
+| Tekken 3 | 4 | A, S / Z, X | □ △ / ✕ ○ | Left punch, right punch, left kick, right kick. Hold back to guard |
+| Street Fighter II | 6 | A, S, D / Z, X, C | □ △ R1 / ✕ ○ L1 | Light, medium, heavy punch / light, medium, heavy kick |
+| Final Fight | 3 | A, S, D | □ ✕ ○ | Attack, jump |
+| Golden Axe | 3 | A, S, D | □ ✕ ○ | Magic, attack, jump |
+| The King of Dragons | 2 | A, S | □ ✕ | Attack, jump |
+| Knights of the Round | 2 | A, S | □ ✕ | Attack, jump |
+| Shadow over Mystara | 4 | A, S, D, F | □ ✕ ○ △ | Attack, jump, select item, use item |
+| Alien vs. Predator | 3 | A, S, D | □ ✕ ○ | Attack, jump, shoot |
+| Zelda: A Link to the Past | SNES pad | A S D F G H for Y B A X L R | by position: □ Y, ✕ B, ○ A, △ X | ✕ sword, ○ action, □ item, △ map |
+
+The button counts come from MAME's input definitions; an exposed button isn't always a separate action. Player 2 uses the same pad layout on the second pad.
+
+A game's own section in `pads.cfg` names each button by its port tag, mask and default value, exactly as MAME has them; a mismatch is silently ignored. Dump them with a Lua script in a sandbox (`manager.machine.ioport.ports`), and check the result the same way.
 
 ## Game notes
 

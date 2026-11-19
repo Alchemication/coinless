@@ -1,6 +1,6 @@
 # Local setup
 
-Player uses PS4 controllers. For actual bindings, inspect project `cfg/default.cfg` and `cfg/<game>.cfg`; game overrides take priority. Do not assume suggested keyboard layouts were applied.
+Player uses PS4 controllers. Bindings: `launcher/pads.cfg` (Coinless's layouts; the Controls table in `docs/games.md` lists them), overridden by anything in `cfg/default.cfg` and `cfg/<game>.cfg` (the player's own changes from MAME's menu).
 
 Save-state support per game is the `saveStates` field in `launcher/games.json`; `./play --check` verifies it against the installed MAME. `./play` lists installed games and which have saves. Idle P2 practice retains health/time limits.
 
